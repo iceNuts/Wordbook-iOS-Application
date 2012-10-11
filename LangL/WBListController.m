@@ -50,7 +50,7 @@
 	NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookSimpleInfo.plist"];
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 	mainDelegate.WordBookList = [NSMutableArray arrayWithContentsOfFile:filePath];
-	
+	//Reload prices data
 	filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
 	mainDelegate.ProductPriceArr = [NSArray arrayWithContentsOfFile:filePath];
 	NSLog(@"%@", mainDelegate.ProductPriceArr);
@@ -62,7 +62,7 @@
     UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_main_green.png"]];
     self.view.backgroundColor = background;
     [background release];
-    myTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 310, 410)];
+    myTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
     myTableView.delegate = self;
     myTableView.dataSource = self;    
     myTableView.separatorColor = [UIColor clearColor];
@@ -87,9 +87,69 @@
     UIBarButtonItem* goSettingButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnViewStat]; 
     [self.navigationItem  setRightBarButtonItem:goSettingButtonItem]; 
     [goSettingButtonItem release]; 
-    [btnViewStat release]; 
+    [btnViewStat release];
+	
+	if(_refreshHeaderView == nil){
+		EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.myTableView.bounds.size.height, self.view.frame.size.width, self.myTableView.bounds.size.height)];
+		view.delegate = self;
+		[self.myTableView addSubview:view];
+		_refreshHeaderView = view;
+		[view release];
+	}
 }
 
+#pragma mark -
+#pragma mark Data Source Loading / Reloading Methods
+
+- (void)reloadTableViewDataSource{
+	//Doing to fetch new books
+	
+}
+
+- (void)doneLoadingTableViewData{
+	
+	[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading:self.myTableView];
+}
+
+#pragma mark -
+#pragma mark EGORefreshTableHeaderDelegate Methods
+
+- (void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView*)view{
+	
+	[self reloadTableViewDataSource];
+	[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:3.0];
+	
+}
+
+- (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view{
+	
+	return NO; // should return if data source model is reloading
+	
+}
+- (NSDate*)egoRefreshTableHeaderDataSourceLastUpdated:(EGORefreshTableHeaderView*)view{
+	
+	return [NSDate date]; // should return date data source was last changed
+	
+}
+
+#pragma mark -
+#pragma mark UIScrollViewDelegate Methods
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+	
+	[_refreshHeaderView egoRefreshScrollViewDidScroll:scrollView];
+	
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+	
+	[_refreshHeaderView egoRefreshScrollViewDidEndDragging:scrollView];
+	
+}
+
+
+#pragma mark -
+#pragma mark myself Methods
 
 -(void) btnGoSettingTouched 
 {

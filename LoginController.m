@@ -12,7 +12,6 @@
 #import "WBListController.h"
 #import "LangLAppDelegate.h"
 #import "RegisterController.h"
-#import "CustomizedCheckBox.h"
 #import "CommonButton.h"
 #import "NavigateToNextButton.h"
 #import "NavigateToPrevButton.h"
@@ -394,7 +393,6 @@
 
 
 - (void)dealloc {
-    [ckbAutoLogin release];
     [textField release];
     [userpwd release];
     [btnLogin release];

@@ -8,9 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h> 
+#import "EGORefreshTableHeaderView.h"
 
-@interface WBListController : UIViewController<UITableViewDelegate, UITableViewDataSource, SKProductsRequestDelegate,SKPaymentTransactionObserver>{
+//Add new pull to refresh feature
+
+@interface WBListController : UIViewController<UITableViewDelegate, UITableViewDataSource, SKProductsRequestDelegate,SKPaymentTransactionObserver, EGORefreshTableHeaderDelegate>{
     UITableView *myTableView;
+	EGORefreshTableHeaderView *_refreshHeaderView;	
 }
 
 @property (nonatomic, retain) UITableView *myTableView;
@@ -24,5 +28,8 @@
 
 -(void)showLoadingAlert;
 -(void)hideLoadingAlert;
+
+- (void)reloadTableViewDataSource;
+- (void)doneLoadingTableViewData;
 
 @end
