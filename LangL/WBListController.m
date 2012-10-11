@@ -103,11 +103,63 @@
 
 - (void)reloadTableViewDataSource{
 	//Doing to fetch new books
-	
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+							 mainDelegate.CurrUserID, @"userID",
+							 nil];
+	NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+	NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListWordBook"];
+	__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+	[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+	[request addRequestHeader:@"Content-Type" value:@"application/json"];
+	[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+	[request setCompletionBlock:^{
+		NSString *responseString = [request responseString];
+		NSDictionary* responseDict = [responseString JSONValue];
+		mainDelegate.WordBookList = (NSMutableArray *) [responseDict objectForKey:@"d"];
+		
+		NSURL *url1 = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobileutils.asmx/ListWordbookProduct"];
+		__block ASIHTTPRequest *request1 = [ASIHTTPRequest requestWithURL:url1];
+		[request1 addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+		[request1 addRequestHeader:@"Content-Type" value:@"application/json"];
+		[request1 setRequestMethod:@"POST"];
+		[request1 setCompletionBlock:^{
+			NSString *responseString1 = [request1 responseString];
+			NSDictionary* responseDict1 = [responseString1 JSONValue];
+			mainDelegate.ProductPriceArr = (NSArray *) [responseDict1 objectForKey:@"d"];
+			
+			//Write basic word book data into plist
+			
+			NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+			NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
+			NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookSimpleInfo.plist"]; //plist for simple word book data
+			
+			[mainDelegate.WordBookList writeToFile:filePath atomically: YES];
+			
+			//Save price data
+			filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
+			
+			[[[NSMutableArray alloc] initWithArray:mainDelegate.ProductPriceArr] writeToFile:filePath atomically:YES];
+			[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
+		}];
+		[request1 setFailedBlock:^{
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			[mainDelegate showNetworkFailed];
+		}];
+		
+		[request1 startAsynchronous];
+		
+	}];
+	[request setFailedBlock:^{
+		LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+		[mainDelegate showNetworkFailed];
+	}];
+	[request startAsynchronous];
 }
 
 - (void)doneLoadingTableViewData{
 	
+	[self.myTableView reloadData];
 	[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading:self.myTableView];
 }
 
@@ -117,7 +169,6 @@
 - (void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView*)view{
 	
 	[self reloadTableViewDataSource];
-	[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:3.0];
 	
 }
 
