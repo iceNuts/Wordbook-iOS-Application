@@ -47,7 +47,6 @@
 @synthesize btnLogin;
 @synthesize userpwd;
 @synthesize forceLogin;
-@synthesize ckbAutoLogin;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -79,13 +78,6 @@
     UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_main_green.png"]];
     self.view.backgroundColor = background;
     [background release];
-    //checkbox
-    ckbAutoLogin = [[CustomizedCheckBox alloc] initWithFrame:CGRectMake(30, 120, 150, 25)];
-    [ckbAutoLogin setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal]; 
-    [ckbAutoLogin.titleLabel setFont:[UIFont systemFontOfSize:12]];
-    [ckbAutoLogin setTitle:@"自动登录"  forState:UIControlStateNormal];
-    [self.view addSubview:ckbAutoLogin];
-    [ckbAutoLogin release];
  
     //btnlogin
     btnLogin = [[CommonButton alloc] init];    
@@ -132,15 +124,11 @@
     NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
     NSString *savedMail = [plistDict objectForKey:@"UserMail"];
     NSString *savedPwd = [plistDict objectForKey:@"UserPwd"];
-    self.forceLogin = [[plistDict objectForKey:@"AutoLogin"] boolValue];
-    if (self.forceLogin)
-        [ckbAutoLogin checkBoxClicked];
     if ([savedMail compare:@""] != NSOrderedSame)
     {
         textField.text = savedMail;
         userpwd.text = savedPwd;             
     }
-    
     [plistDict release];
     [self loadSettings];
 }
@@ -181,17 +169,18 @@
 
 -(void)viewDidAppear:(BOOL)animated
 {
-    [super viewDidAppear:animated];   
-    if (forceLogin)
-        [self btnLoginTouched];
-    self.forceLogin = NO;
-/*
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *flag = [defaults objectForKey:@"firstLogin"];
-    if (!flag || ![flag isEqualToString:@"NO"]) { 
-        [self showAbout];
-        [defaults setObject:@"NO" forKey:@"firstLogin"];
-    }*/
+    [super viewDidAppear:animated];
+	//If login view appears, user must login
+	NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
+	NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
+	
+	NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithCapacity:3];
+
+	[plistDict setObject:@"0" forKey:@"UserID"];
+	[plistDict writeToFile:filePath atomically: YES];
+	[plistDict release];
+	self.forceLogin = NO;
 }
 
 - (void)viewDidUnload
@@ -261,19 +250,6 @@
     btnLogin.enabled = NO;
 	[loadingHint startAnimating];
 
-    NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
-    NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
-    
-    NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithCapacity:3];
-    
-    [plistDict setObject:textField.text forKey:@"UserMail"];
-    [plistDict setObject:userpwd.text forKey:@"UserPwd"];
-    [plistDict setObject:[NSNumber numberWithBool:ckbAutoLogin.isChecked] forKey:@"AutoLogin"];
-    [plistDict setObject: [NSNumber numberWithInteger:1] forKey:@"AboutShown"];
-    [plistDict writeToFile:filePath atomically: YES];     
-    [plistDict release];           
-
     [self DoLogin: textField.text UserPwd:userpwd.text];
 }
 
@@ -328,11 +304,24 @@
     else {
         LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
         mainDelegate.CurrUserID = [responseText substringWithRange:NSMakeRange(5,9)];
-                
+        mainDelegate.isWordFirstAppear = NO;
         NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                  mainDelegate.CurrUserID, @"userID",
                                  nil];
         
+		NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
+		NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
+		
+		NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithCapacity:3];
+				
+		[plistDict setObject:textField.text forKey:@"UserMail"];
+		[plistDict setObject:userpwd.text forKey:@"UserPwd"];
+		[plistDict setObject:mainDelegate.CurrUserID forKey:@"UserID"];
+		[plistDict setObject: [NSNumber numberWithInteger:1] forKey:@"AboutShown"];
+		[plistDict writeToFile:filePath atomically: YES];
+		[plistDict release];
+		
         //RPC JSON
         NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
         NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListWordBook"];
@@ -354,10 +343,23 @@
                 NSString *responseString1 = [request1 responseString];                
                 NSDictionary* responseDict1 = [responseString1 JSONValue];
                 [loadingHint stopAnimating];
-                mainDelegate.ProductPriceArr = (NSArray *) [responseDict1 objectForKey:@"d"];            
+                mainDelegate.ProductPriceArr = (NSArray *) [responseDict1 objectForKey:@"d"];
                 btnLogin.enabled = YES;       
                 
-                WBListController *wbController=[[WBListController alloc] initWithNibName:@"WBListController" bundle:nil];            
+				//Write basic word book data into plist
+				
+				NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+				NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
+				NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookSimpleInfo.plist"]; //plist for simple word book data
+				
+				[mainDelegate.WordBookList writeToFile:filePath atomically: YES];
+	
+				//Save price data
+				filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
+				
+				[[[NSMutableArray alloc] initWithArray:mainDelegate.ProductPriceArr] writeToFile:filePath atomically:YES];
+				
+                WBListController *wbController=[[WBListController alloc] initWithNibName:@"WBListController" bundle:nil];
                 [self.navigationController pushViewController:wbController animated:YES];
                 [wbController release];
             }];
@@ -365,8 +367,8 @@
                 LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
                 [mainDelegate showNetworkFailed];
             }];
-            [request1 startAsynchronous];        
-           
+			
+            [request1 startAsynchronous];
       
         }];
         [request setFailedBlock:^{            

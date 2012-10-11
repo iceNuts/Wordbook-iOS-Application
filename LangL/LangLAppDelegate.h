@@ -59,7 +59,9 @@
 @property bool AutoVoice;
 @property bool AutoNextWord;
 @property bool AutoFamiliarity;
+@property bool isWordFirstAppear;
 -(NSString *)GetDictNameByType:(NSInteger) dictType;
 -(NSString *)GetFamiliarityName:(NSInteger) familiarity;
 -(void)showNetworkFailed;
+-(void)userLogout;
 @end

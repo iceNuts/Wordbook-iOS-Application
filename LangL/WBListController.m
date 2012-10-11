@@ -41,6 +41,21 @@
 
 #pragma mark - View lifecycle
 
+- (void)viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+	//Reload saved word book data
+	NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
+	NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookSimpleInfo.plist"];
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	mainDelegate.WordBookList = [NSMutableArray arrayWithContentsOfFile:filePath];
+	
+	filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
+	mainDelegate.ProductPriceArr = [NSArray arrayWithContentsOfFile:filePath];
+	NSLog(@"%@", mainDelegate.ProductPriceArr);
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];  
@@ -59,19 +74,7 @@
     self.title = @"我的词汇书"; 
     
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];  
-    LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-    if ([mainDelegate.CurrUserID isEqualToString:@"O10060826"])
-    {
-        UIAlertView *alerView =  [[UIAlertView alloc] initWithTitle:@"提示"    
-                                            message:@"你目前处于体验状态，如需正式使用，请点击[返回]后登录或注册个人专属账户"                                                           
-                                            delegate:nil 
-                                            cancelButtonTitle:NSLocalizedString(@"关闭",nil)
-                                            otherButtonTitles:nil];   
         
-        [alerView show];   
-        [alerView release];   
-    }
-    
     UIBarButtonItem *statButton = [[UIBarButtonItem alloc] initWithTitle:@"状态" style:UIBarButtonItemStylePlain target:self action:@selector(btnViewStat)];          
     self.navigationItem.rightBarButtonItem = statButton;
     [statButton release];
@@ -413,7 +416,7 @@
                                          mainDelegate.CurrUserID, @"userID",
                                          @"", @"productID",
                                          @"", @"receipt",
-                                         [NSString stringWithString:@"0"], @"inSandBox",
+                                         @"0", @"inSandBox",
                                          nil];
                 
                 //RPC JSON

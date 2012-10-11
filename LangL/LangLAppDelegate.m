@@ -8,6 +8,7 @@
 
 #import "LangLAppDelegate.h"
 #import "LoginController.h"
+#import "WBListController.h"
 
 
 @implementation LangLAppDelegate
@@ -35,23 +36,43 @@
 @synthesize AutoVoice;
 @synthesize AutoNextWord;
 @synthesize AutoFamiliarity;
+@synthesize isWordFirstAppear;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     NSMutableArray *arr = [NSMutableArray arrayWithCapacity: 100];
     self.filteredArr = arr;
         
-    LoginController *aLoginController = [[LoginController alloc]
-                                         initWithNibName:@"LoginController" bundle:nil];
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:aLoginController];     
+	//If login, switch to word list directly
+	NSArray *StoreFilePath            =    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *DoucumentsDirectiory	=    [StoreFilePath objectAtIndex:0];
+    NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
+    
+    NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+    NSString *uid = [plistDict objectForKey:@"UserID"];
+	UINavigationController *navigationController;
+	
+    if (![uid isEqualToString: @"0"] && uid){
+		self.CurrUserID = uid;
+		self.isWordFirstAppear = YES;
+		WBListController *wbController=[[WBListController alloc] initWithNibName:@"WBListController" bundle:nil];
+		navigationController = [[UINavigationController alloc] initWithRootViewController:wbController];
+		[wbController release];
+	}else{
+		self.isWordFirstAppear = NO;
+		LoginController *aLoginController = [[LoginController alloc]
+											 initWithNibName:@"LoginController" bundle:nil];
+		navigationController = [[UINavigationController alloc] initWithRootViewController:aLoginController];
+		aLoginController.forceLogin = YES;
+		[aLoginController release];   
+	}
+	
     navigationController.delegate = self;
-    aLoginController.forceLogin = YES;
     self.window.rootViewController = navigationController;
     
     if ([[UINavigationBar class] respondsToSelector:@selector(appearance)]) {
         [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"bg_header.png"] forBarMetrics:UIBarMetricsDefault];
     }
-    [aLoginController release];    // Override point for customization after application launch.
     [navigationController release];
     [self.window makeKeyAndVisible];  
     self.NeedReloadSchedule = NO;
@@ -60,6 +81,36 @@
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	
+	if(isWordFirstAppear && [navigationController.viewControllers count] == 1){
+		//Add log out button
+		UIButton *myBackButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+        [myBackButton setFrame:CGRectMake(0,0,60,35)];
+        UIImage *image = [UIImage imageNamed:@"butn_header_back_n.png"];
+        UIImage *stretchImage =
+        [image stretchableImageWithLeftCapWidth:15.0 topCapHeight:0.0];
+		
+        UIImage *image1 = [UIImage imageNamed:@"butn_header_back_p.png"];
+        UIImage *stretchImage1 =
+        [image1 stretchableImageWithLeftCapWidth:15.0 topCapHeight:0.0];
+        
+        [myBackButton setBackgroundImage: stretchImage forState:UIControlStateNormal];
+        [myBackButton setBackgroundImage: stretchImage1 forState:UIControlStateSelected];
+        [myBackButton setEnabled:YES];
+        if (viewController.view.tag == 1001)
+            [myBackButton setTitle:@"  确 定" forState:UIControlStateNormal];
+        else [myBackButton setTitle:@"  返 回" forState:UIControlStateNormal];
+        [myBackButton.titleLabel setFont: [UIFont boldSystemFontOfSize: 14]];
+        myBackButton.titleLabel.textColor = [UIColor whiteColor];
+        [myBackButton addTarget:self action:@selector(userLogout) forControlEvents:UIControlEventTouchUpInside];
+        
+        [myBackButton release];
+        UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithCustomView:myBackButton];
+        viewController.navigationItem.leftBarButtonItem = backButton;
+		
+        [backButton release];
+	}
+	
     if([navigationController.viewControllers count ] > 1) {
         
         UIButton *myBackButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
@@ -162,37 +213,37 @@
 {
     switch (dictType) {
         case 0:
-            return [NSString stringWithString: @"四级"];
+            return @"四级";
         case 1:
-            return [NSString stringWithString: @"六级"];          
+            return @"六级";
         case 2:
-            return [NSString stringWithString: @"高考"];    
+            return @"高考";    
         case 3:
-            return [NSString stringWithString: @"考研"];    
+            return @"考研";
         case 4:
-            return [NSString stringWithString: @"TOEFL"];
+            return @"TOEFL";
         case 5:
-            return [NSString stringWithString: @"GRE"];
+            return @"GRE";
         case 6:
-            return [NSString stringWithString: @"IELTS"];
+            return @"IELTS";
         case 7:
-            return [NSString stringWithString: @"商务英语"];
+            return @"商务英语";
         case 8:
-            return [NSString stringWithString: @"GMAT"];
+            return @"GMAT";
         case 9:
-            return [NSString stringWithString: @"SAT"];
+            return @"SAT";
         case 10:
-            return [NSString stringWithString: @"新GRE-句子填空"];
+            return @"新GRE-句子填空";
         case 11:
-            return [NSString stringWithString: @"新GRE-文章阅读"];
+            return @"新GRE-文章阅读";
         case 12:
-            return [NSString stringWithString: @"新GRE(综合)"];
+            return @"新GRE(综合)";
         case 13:
-            return [NSString stringWithString: @"四级(2012版)"];     
+            return @"四级(2012版)";     
         case 14:
-            return [NSString stringWithString: @"考研(2013版)"];  
+            return @"考研(2013版)";  
         default:
-            return [NSString stringWithString: @"(请选择)"];
+            return @"(请选择)";
     }
 }
 
@@ -200,17 +251,17 @@
 {
     switch (familiarity) {
         case 0:
-            return [NSString stringWithString:@"形同陌路"];
+            return @"形同陌路";
         case 1:
-            return [NSString stringWithString:@"似曾相识"];
+            return @"似曾相识";
         case 2:
-            return [NSString stringWithString:@"半生不熟"];
+            return @"半生不熟";
         case 3:
-            return [NSString stringWithString:@"一见如故"];
+            return @"一见如故";
         case 4:
-            return [NSString stringWithString:@"刻骨铭心"];            
+            return @"刻骨铭心";            
         default:
-            return [NSString stringWithString:@""];
+            return @"";
     }
 }
 
@@ -227,4 +278,20 @@
     [alert release];
 }
 
+-(void)userLogout
+{
+	self.isWordFirstAppear = NO;
+	LoginController *aLoginController = [[LoginController alloc]
+										 initWithNibName:@"LoginController" bundle:nil];
+	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:aLoginController];
+	aLoginController.forceLogin = YES;
+	[aLoginController release];
+	navigationController.delegate = self;
+    self.window.rootViewController = navigationController;
+    
+    if ([[UINavigationBar class] respondsToSelector:@selector(appearance)]) {
+        [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"bg_header.png"] forBarMetrics:UIBarMetricsDefault];
+    }
+    [navigationController release];
+}
 @end
