@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h> 
+#import "PhaseController.h"
 #import "EGORefreshTableHeaderView.h"
 
 //Add new pull to refresh feature

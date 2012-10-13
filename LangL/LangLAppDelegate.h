@@ -25,6 +25,7 @@
     NSMutableArray* ScheduleList;
     NSMutableArray* WordList;
     NSMutableArray* WordBookList;
+	int PhaseCount;
     NSMutableArray* QuizList;
     NSInteger CurrSortType;
     NSMutableArray* filteredArr;
@@ -55,6 +56,7 @@
 @property (nonatomic, retain)  NSMutableArray* WordBookList;
 @property (nonatomic, retain)  NSMutableArray* filteredArr;
 @property (nonatomic, retain)  NSMutableArray* QuizList;
+@property (nonatomic, assign)  int PhaseCount;
 @property (nonatomic, retain)  CreateWordBookParams* createParams;
 @property bool AutoVoice;
 @property bool AutoNextWord;
@@ -63,5 +65,7 @@
 -(NSString *)GetDictNameByType:(NSInteger) dictType;
 -(NSString *)GetFamiliarityName:(NSInteger) familiarity;
 -(void)showNetworkFailed;
+-(void)showDownloadSuccess;
+-(void)showDownloadInfo;
 -(void)userLogout;
 @end

@@ -40,6 +40,24 @@
 
 #pragma mark - View lifecycle
 
+-(void)loadView
+{
+    [super loadView];
+    LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+    
+    //if has phase data, don't need to reload
+	
+	mainDelegate.ScheduleList = nil;
+	
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
+	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+	
+	mainDelegate.ScheduleList = [NSMutableArray arrayWithContentsOfFile:filePath];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -57,22 +75,49 @@
     [formatter release];  
     
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-        
- 
-    NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+	
+	if(mainDelegate.ScheduleList == nil){
+		NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                  mainDelegate.CurrUserID, @"userID",
                                  mainDelegate.CurrWordBookID, @"wordBookID",
                                  [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"phaseIdx",
                                  nil];
         
-    NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
-    NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListSchedule"];
+		NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
+		NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListSchedule"];
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];    
-    [request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
-    [request setDelegate:self];
-    [request startAsynchronous];
+		[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
+		[request addRequestHeader:@"Content-Type" value:@"application/json"];    
+		[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+		[request setDelegate:self];
+		[request startAsynchronous];
+	}else{
+		[loadingIcon stopAnimating];
+		scheduleView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
+		
+		scheduleView.delegate = self;
+		scheduleView.dataSource = self;
+		[self.view addSubview:self.scheduleView];
+		
+		scheduleView.separatorColor = [UIColor clearColor];
+		scheduleView.backgroundColor = [UIColor clearColor];
+		scheduleView.opaque = NO;
+		scheduleView.backgroundView = nil;
+		
+		UIBarButtonItem *statButton = [[UIBarButtonItem alloc] initWithTitle:@"状态" style:UIBarButtonItemStylePlain target:self action:@selector(btnViewStat)];
+		self.navigationItem.rightBarButtonItem = statButton;
+		[statButton release];
+		
+		NavigateToNextButton *btnViewStat = [[NavigateToNextButton alloc] init];
+		[btnViewStat setTitle:@"  统 计" forState:UIControlStateNormal];
+		
+		[btnViewStat addTarget:self action:@selector(btnViewStat) forControlEvents:UIControlEventTouchUpInside];
+		//定制自己的风格的  UIBarButtonItem
+		UIBarButtonItem* viewStatButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnViewStat];
+		[self.navigationItem  setRightBarButtonItem:viewStatButtonItem];
+		[viewStatButtonItem release];
+		[btnViewStat release];
+	}
     
     hasPaid = false;
     for (NSDictionary *wordBook in mainDelegate.WordBookList) {
@@ -80,7 +125,8 @@
         {
             if ([[wordBook objectForKey:@"IsPaid"] integerValue] == 1)
                 hasPaid = YES;
-            else hasPaid = NO;
+            else
+				hasPaid = NO;
             break;            
         }
     }
@@ -98,30 +144,22 @@
     
     
     mainDelegate.ScheduleList = (NSMutableArray *) [responseDict objectForKey:@"d"];
-    /*
-    for (NSDictionary *singleDay in mainDelegate.ScheduleList) {
-        NSMutableArray *newList = [singleDay objectForKey:@"NL"];
-        if (newList.count == 0)
-        {
-            NSDictionary *emptyDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                       @"0",@"LID",
-                                       @"false", @"C",                                 
-                                       nil];
-       
-            [newList addObject:emptyDict];             
-        }
-        
-        NSMutableArray *oldList = [singleDay objectForKey:@"OL"];
-        if (oldList.count == 0)
-        {
-            NSDictionary *emptyDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                       @"0",@"LID",
-                                       @"false", @"C",                                 
-                                       nil];
-            [oldList addObject:emptyDict];  
-        }       
-    }*/
-    
+   
+    //write phase data to plist
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
+	
+	//create phaseDir
+	NSError *error;
+	if (![[NSFileManager defaultManager] fileExistsAtPath:phaseDir]){
+		[[NSFileManager defaultManager] createDirectoryAtPath: phaseDir withIntermediateDirectories:YES attributes:nil error:&error];
+    }
+	
+	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"]; 	
+	[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
+				
     scheduleView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
     
     scheduleView.delegate = self;
@@ -162,18 +200,6 @@
     
     [self.navigationController pushViewController:detailViewController animated:YES];
     [detailViewController release];
-}
-
-
--(void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-    if (mainDelegate.NeedReloadSchedule)
-    {
-        mainDelegate.NeedReloadSchedule = NO;
-        [scheduleView reloadData];    
-    }
 }
 
 - (void)viewDidUnload

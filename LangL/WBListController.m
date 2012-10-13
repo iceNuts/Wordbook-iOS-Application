@@ -53,7 +53,6 @@
 	//Reload prices data
 	filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
 	mainDelegate.ProductPriceArr = [NSArray arrayWithContentsOfFile:filePath];
-	NSLog(@"%@", mainDelegate.ProductPriceArr);
 }
 
 - (void)viewDidLoad
@@ -144,6 +143,7 @@
 		}];
 		[request1 setFailedBlock:^{
 			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
 			[mainDelegate showNetworkFailed];
 		}];
 		
@@ -152,6 +152,7 @@
 	}];
 	[request setFailedBlock:^{
 		LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+		[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
 		[mainDelegate showNetworkFailed];
 	}];
 	[request startAsynchronous];
@@ -222,13 +223,6 @@
 {
     [aboutController dismissModalViewControllerAnimated:YES];
 }
-
--(void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    [myTableView reloadData];     
-}
-
 
 - (void)viewDidUnload
 {
@@ -517,8 +511,8 @@
             case SKPaymentTransactionStatePurchased://交易完成    
             {
                 [self completeTransaction:transaction];   
-                NSString* jsonObjectString = [self encode:(uint8_t *)transaction.transactionReceipt.bytes
-                                                   length:transaction.transactionReceipt.length];
+//                NSString* jsonObjectString = [self encode:(uint8_t *)transaction.transactionReceipt.bytes
+//                                                   length:transaction.transactionReceipt.length];
                 
                 LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
                 
@@ -581,8 +575,8 @@
 
 - (void) completeTransaction: (SKPaymentTransaction *)transaction  
 {       
-    NSString *product = transaction.payment.productIdentifier;   
-      
+//    NSString *product = transaction.payment.productIdentifier;   
+//      
     
     [[SKPaymentQueue defaultQueue] finishTransaction: transaction];   
     
@@ -645,6 +639,8 @@
         [createNewController release];    
         return;    
     }
+	//#Old:Get into Schedule view
+	//#New:Get into Phase view
     mainDelegate.NeedReloadSchedule = NO;
     NSDictionary *dict = [mainDelegate.WordBookList objectAtIndex: indexPath.row];
     mainDelegate.CurrWordBookID = [dict valueForKey:@"WordBookID"];
@@ -653,10 +649,9 @@
     mainDelegate.CurrDictType = [[dict valueForKey:@"DictType"]  integerValue];
 
      
-    ScheduleController *detailViewController = [[ScheduleController alloc] initWithNibName:@"ScheduleController" bundle:nil];
-
-    [self.navigationController pushViewController:detailViewController animated:YES];
-    [detailViewController release];
+	PhaseController *phaseViewController = [[PhaseController alloc] initWithNibName:@"PhaseController" bundle:nil];
+	[self.navigationController pushViewController:phaseViewController animated:YES];
+	[phaseViewController release];
 
 }
 

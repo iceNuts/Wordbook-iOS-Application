@@ -37,6 +37,7 @@
 @synthesize AutoNextWord;
 @synthesize AutoFamiliarity;
 @synthesize isWordFirstAppear;
+@synthesize PhaseCount;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -272,6 +273,32 @@
                           message:@"因为网络问题无法连接到服务器"
                           delegate:self
                           cancelButtonTitle:@"确定"
+                          otherButtonTitles:nil];
+    
+    [alert show];
+    [alert release];
+}
+
+-(void)showDownloadSuccess
+{
+	UIAlertView *alert = [[UIAlertView alloc]//
+                          initWithTitle:nil
+                          message:@"词库下载成功！"
+                          delegate:self
+                          cancelButtonTitle:@"好"
+                          otherButtonTitles:nil];
+    
+    [alert show];
+    [alert release];
+}
+
+-(void)showDownloadInfo
+{
+	UIAlertView *alert = [[UIAlertView alloc]//
+                          initWithTitle:nil
+                          message:@"词库下载过程中，请不要离开本页面或退出应用"
+                          delegate:self
+                          cancelButtonTitle:@"好"
                           otherButtonTitles:nil];
     
     [alert show];

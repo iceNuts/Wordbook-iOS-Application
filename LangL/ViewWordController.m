@@ -152,7 +152,7 @@
     for (id subview in extraData.subviews)
         if ([[subview class] isSubclassOfClass: [UIScrollView class]])
             ((UIScrollView *)subview).bounces = NO;
-    self.htmlPrefix = [NSString stringWithString:@"<html> \n"
+    self.htmlPrefix = @"<html> \n"
                                    "<head> \n"
                                    "<style type=\"text/css\"> \n"
                                    "body { \n"
@@ -164,7 +164,7 @@
                                    "</style> \n"
                                    "</head> \n"
                                    "<body>%@</body> \n"
-                                   "</html>"]; 
+                                   "</html>";
        
     [extraData stringByEvaluatingJavaScriptFromString:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust= '30%'"];
     self.exampleSenHtml = [NSMutableString stringWithString: @""];
