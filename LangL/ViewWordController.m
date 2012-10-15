@@ -414,11 +414,15 @@
     isPlaying = YES;
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     NSString *currWordProto = [[mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]] objectForKey:@"W"];
-    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-        NSUserDomainMask, YES) objectAtIndex:0];
 
-    NSString *mp3File = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp3", currWordProto]];
-    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp3File]; 
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", mainDelegate.CurrWordBookID]];
+	NSString *bookmp3 = [bookDir stringByAppendingPathComponent:@"mp3"];
+	[[NSFileManager defaultManager] createDirectoryAtPath:bookmp3 withIntermediateDirectories:YES attributes:nil error:nil];
+	NSString *mp3dir = [bookmp3 stringByAppendingPathComponent:[currWordProto stringByAppendingString:@".mp3"]];
+    
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp3dir];
     if (self.player.retainCount > 0)
         [player release];
     
@@ -426,7 +430,7 @@
     {
         NSError *error;
         player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL
-            fileURLWithPath:mp3File] error:&error]; 
+            fileURLWithPath:mp3dir] error:&error]; 
         [player play];        
     }
     else
@@ -435,9 +439,9 @@
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://www.langlib.com/voice/%@/%@.mp3", [currWordProto substringToIndex:1], [[currWordProto stringByReplacingOccurrencesOfString:@"*" withString:@""] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
   
         NSData *soundData = [NSData dataWithContentsOfURL:url];
-        [soundData writeToFile:mp3File atomically:YES];
+        [soundData writeToFile:mp3dir atomically:YES];
         player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL
-            fileURLWithPath:mp3File] error:&error];  
+            fileURLWithPath:mp3dir] error:&error];  
         [player play];
     }
     isPlaying = NO;

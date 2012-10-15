@@ -41,12 +41,16 @@
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 	NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
 	NSDictionary* dict = [[NSDictionary alloc] initWithContentsOfFile:filePath];
-	if([dict objectForKey: mainDelegate.CurrWordBookID] == nil){
-		NSDictionary *new_dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
-		[new_dict writeToFile:filePath atomically:YES];
-		[new_dict release];
+	if([dict objectForKey: [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType]] == nil){
+		NSMutableDictionary *old_dict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+		if(nil == old_dict){
+			old_dict = [[NSMutableDictionary alloc] initWithCapacity:0];
+		}
+		[old_dict setObject:@"0" forKey:[NSString stringWithFormat:@"%d",mainDelegate.CurrDictType]];
+		[old_dict writeToFile:filePath atomically:YES];
+		[old_dict release];
 		mp3done = NO;
-	}else if([[dict objectForKey: mainDelegate.CurrWordBookID] isEqualToString:@"0"]){
+	}else if([[dict objectForKey: [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType]] isEqualToString:@"0"]){
 		mp3done = NO;
 	}else{
 		mp3done = YES;
@@ -488,7 +492,7 @@
 		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
-		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
+		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], nil]];
 		[dict writeToFile:filePath atomically:YES];
 		[dict release];
 		if(downloadCanceled){
@@ -507,7 +511,7 @@
 		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
-		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"1", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
+		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"1", nil] forKeys: [[NSArray alloc] initWithObjects:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], nil]];
 		[dict writeToFile:filePath atomically:YES];
 		[dict release];
 		[myTableView reloadData];
