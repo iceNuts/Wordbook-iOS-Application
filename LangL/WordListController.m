@@ -48,63 +48,101 @@
     initLoad = YES;
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     self.title = [NSString stringWithFormat:@"List %d", mainDelegate.CurrListID];
-    //0: init   1: asc  2: desc   3;fam asc  4 fam desc  5: random
-    mainDelegate.CurrSortType = 0;
-
-    NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                             mainDelegate.CurrWordBookID, @"wordBookID",
-                             @"4", @"familiarity",
-                             @"4", @"sortType",
-                             [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"phaseIdx",
-                             [NSString stringWithFormat:@"%d", mainDelegate.CurrListID], @"listID",
-                             [NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], @"dictType",
-                             mainDelegate.CurrUserID, @"userID",
-                             nil];
-    
-    //RPC JSON
-    NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
-    NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListWords"];
-    
-    __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];    
-    [request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
-    [request setCompletionBlock:^{   
-        [loadingIcon stopAnimating];
-        NSString *responseString = [request responseString];
-        NSDictionary* responseDict = [responseString JSONValue];
-        mainDelegate.WordList = (NSMutableArray *) [responseDict objectForKey:@"d"];
-        mainDelegate.CurrWordIdx = 0;              
-        int totalWords = mainDelegate.WordList.count;
-        [mainDelegate.filteredArr removeAllObjects];
-        for (int i = 0; i <= totalWords - 1; i++) {
-            [mainDelegate.filteredArr addObject: [NSNumber numberWithInt: i]];
-        }
-        mainDelegate.enableFilter = NO;
-        wordListView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 415)];
-        wordListView.delegate = self;
-        wordListView.dataSource = self;
-        [self.view addSubview:self.wordListView];
-        
-        wordListView.separatorColor = [UIColor clearColor];  
-        wordListView.backgroundColor = [UIColor clearColor];
-        wordListView.opaque = NO;
-        wordListView.backgroundView = nil;
-        
-        
-    }];
-    [request setFailedBlock:^{
-        [loadingIcon stopAnimating];
-        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-        [mainDelegate showNetworkFailed];
-    }];
-    [request startAsynchronous];
-    
-    NavigateToNextButton *btnSort = [[NavigateToNextButton alloc] init];    
-    [btnSort setTitle:@"  排 序" forState:UIControlStateNormal];     
-    [btnSort addTarget:self action:@selector(btnSelectSortTouched) forControlEvents:UIControlEventTouchUpInside];     
+	
+	//Read the data to a list
+	mainDelegate.WordList = nil;
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
+	NSString *wordlistDir = [[phaseDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrListID]] stringByAppendingString:@".plist"];
+	mainDelegate.WordList = [[NSMutableArray alloc] initWithContentsOfFile:wordlistDir];
+		
+	if(mainDelegate.WordList == nil){
+		//0: init   1: asc  2: desc   3;fam asc  4 fam desc  5: random
+		mainDelegate.CurrSortType = 0;
+		
+		NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+								 mainDelegate.CurrWordBookID, @"wordBookID",
+								 @"4", @"familiarity",
+								 @"4", @"sortType",
+								 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"phaseIdx",
+								 [NSString stringWithFormat:@"%d", mainDelegate.CurrListID], @"listID",
+								 [NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], @"dictType",
+								 mainDelegate.CurrUserID, @"userID",
+								 nil];
+		
+		
+		//RPC JSON
+		NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+		NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListWords"];
+		
+		__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+		[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+		[request addRequestHeader:@"Content-Type" value:@"application/json"];
+		[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+		[request setCompletionBlock:^{
+			[loadingIcon stopAnimating];
+			NSString *responseString = [request responseString];
+			NSDictionary* responseDict = [responseString JSONValue];
+			mainDelegate.WordList = (NSMutableArray *) [responseDict objectForKey:@"d"];
+			
+			//Write the data to a list
+			NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+			NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+			NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+			NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
+			[[NSFileManager defaultManager] createDirectoryAtPath:phaseDir withIntermediateDirectories:YES attributes:nil error:nil];
+			NSString *wordlistDir = [[phaseDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrListID]] stringByAppendingString:@".plist"];
+			[mainDelegate.WordList writeToFile:wordlistDir atomically:YES];
+			mainDelegate.CurrWordIdx = 0;
+			int totalWords = mainDelegate.WordList.count;
+			[mainDelegate.filteredArr removeAllObjects];
+			for (int i = 0; i <= totalWords - 1; i++) {
+				[mainDelegate.filteredArr addObject: [NSNumber numberWithInt: i]];
+			}
+			mainDelegate.enableFilter = NO;
+			wordListView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 415)];
+			wordListView.delegate = self;
+			wordListView.dataSource = self;
+			[self.view addSubview:self.wordListView];
+			
+			wordListView.separatorColor = [UIColor clearColor];
+			wordListView.backgroundColor = [UIColor clearColor];
+			wordListView.opaque = NO;
+			wordListView.backgroundView = nil;
+			[loadingIcon stopAnimating];
+		}];
+		[request setFailedBlock:^{
+			[loadingIcon stopAnimating];
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			[mainDelegate showNetworkFailed];
+		}];
+		[request startAsynchronous];
+	}else{
+		[loadingIcon stopAnimating];
+		mainDelegate.CurrWordIdx = 0;
+		int totalWords = mainDelegate.WordList.count;
+		[mainDelegate.filteredArr removeAllObjects];
+		for (int i = 0; i <= totalWords - 1; i++) {
+			[mainDelegate.filteredArr addObject: [NSNumber numberWithInt: i]];
+		}
+		mainDelegate.enableFilter = NO;
+		wordListView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 415)];
+		wordListView.delegate = self;
+		wordListView.dataSource = self;
+		[self.view addSubview:self.wordListView];
+		
+		wordListView.separatorColor = [UIColor clearColor];
+		wordListView.backgroundColor = [UIColor clearColor];
+		wordListView.opaque = NO;
+		wordListView.backgroundView = nil;
+	}
+    NavigateToNextButton *btnSort = [[NavigateToNextButton alloc] init];
+    [btnSort setTitle:@"  排 序" forState:UIControlStateNormal];
+    [btnSort addTarget:self action:@selector(btnSelectSortTouched) forControlEvents:UIControlEventTouchUpInside];
     //定制自己的风格的  UIBarButtonItem
-    UIBarButtonItem* sortButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnSort]; 
+    UIBarButtonItem* sortButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnSort];
     [self.navigationItem  setRightBarButtonItem:sortButtonItem]; 
     [sortButtonItem release]; 
     [btnSort release];  
