@@ -27,6 +27,12 @@
 		430071531626B819006D4E55 /* whiteArrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4300714B1626B819006D4E55 /* whiteArrow@2x.png */; };
 		430071561627170E006D4E55 /* PhaseController.m in Sources */ = {isa = PBXBuildFile; fileRef = 430071551627170C006D4E55 /* PhaseController.m */; };
 		4300715A1627B1F7006D4E55 /* PhaseController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 430071591627B1F6006D4E55 /* PhaseController.xib */; };
+		436A899A162BA56B00749B99 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 436A8999162BA56B00749B99 /* libsqlite3.0.dylib */; };
+		436A89A9162BAD1C00749B99 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A899F162BAD1C00749B99 /* ioapi.c */; };
+		436A89AA162BAD1C00749B99 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A1162BAD1C00749B99 /* mztools.c */; };
+		436A89AB162BAD1C00749B99 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A3162BAD1C00749B99 /* unzip.c */; };
+		436A89AC162BAD1C00749B99 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A5162BAD1C00749B99 /* zip.c */; };
+		436A89AD162BAD1C00749B99 /* ZipArchive.mm in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A8162BAD1C00749B99 /* ZipArchive.mm */; };
 		6A54A30313F785EB00D6CF93 /* LoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A54A30113F785EB00D6CF93 /* LoginController.m */; };
 		6A54A30413F785EB00D6CF93 /* LoginController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6A54A30213F785EB00D6CF93 /* LoginController.xib */; };
 		6A7EA2EE1462E5DC00BB545C /* NavigateToPrevButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A7EA2ED1462E5DC00BB545C /* NavigateToPrevButton.m */; };
@@ -421,6 +427,18 @@
 		430071541627170B006D4E55 /* PhaseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhaseController.h; sourceTree = "<group>"; };
 		430071551627170C006D4E55 /* PhaseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhaseController.m; sourceTree = "<group>"; };
 		430071591627B1F6006D4E55 /* PhaseController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhaseController.xib; sourceTree = "<group>"; };
+		436A8999162BA56B00749B99 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
+		436A899E162BAD1C00749B99 /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
+		436A899F162BAD1C00749B99 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
+		436A89A0162BAD1C00749B99 /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
+		436A89A1162BAD1C00749B99 /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
+		436A89A2162BAD1C00749B99 /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
+		436A89A3162BAD1C00749B99 /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
+		436A89A4162BAD1C00749B99 /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
+		436A89A5162BAD1C00749B99 /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
+		436A89A6162BAD1C00749B99 /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
+		436A89A7162BAD1C00749B99 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
+		436A89A8162BAD1C00749B99 /* ZipArchive.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ZipArchive.mm; sourceTree = "<group>"; };
 		6A54A30013F785EB00D6CF93 /* LoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoginController.h; path = ../LoginController.h; sourceTree = "<group>"; };
 		6A54A30113F785EB00D6CF93 /* LoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LoginController.m; path = ../LoginController.m; sourceTree = "<group>"; };
 		6A54A30213F785EB00D6CF93 /* LoginController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LoginController.xib; path = ../LoginController.xib; sourceTree = "<group>"; };
@@ -694,6 +712,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				436A899A162BA56B00749B99 /* libsqlite3.0.dylib in Frameworks */,
 				3201088596B4756681693705 /* libThree20UICommon.a in Frameworks */,
 				320D7DCCE32703ACAB9A45E5 /* libThree20.a in Frameworks */,
 				320A737074758E53BA54BE95 /* libThree20UINavigator.a in Frameworks */,
@@ -788,6 +807,40 @@
 				430071421626B7F5006D4E55 /* EGORefreshTableHeaderView.m */,
 			);
 			name = PullToRefresh;
+			sourceTree = "<group>";
+		};
+		436A899B162BAD0D00749B99 /* zip */ = {
+			isa = PBXGroup;
+			children = (
+				436A899C162BAD1C00749B99 /* ZipArchive */,
+			);
+			name = zip;
+			sourceTree = "<group>";
+		};
+		436A899C162BAD1C00749B99 /* ZipArchive */ = {
+			isa = PBXGroup;
+			children = (
+				436A899D162BAD1C00749B99 /* minizip */,
+				436A89A7162BAD1C00749B99 /* ZipArchive.h */,
+				436A89A8162BAD1C00749B99 /* ZipArchive.mm */,
+			);
+			path = ZipArchive;
+			sourceTree = "<group>";
+		};
+		436A899D162BAD1C00749B99 /* minizip */ = {
+			isa = PBXGroup;
+			children = (
+				436A899E162BAD1C00749B99 /* crypt.h */,
+				436A899F162BAD1C00749B99 /* ioapi.c */,
+				436A89A0162BAD1C00749B99 /* ioapi.h */,
+				436A89A1162BAD1C00749B99 /* mztools.c */,
+				436A89A2162BAD1C00749B99 /* mztools.h */,
+				436A89A3162BAD1C00749B99 /* unzip.c */,
+				436A89A4162BAD1C00749B99 /* unzip.h */,
+				436A89A5162BAD1C00749B99 /* zip.c */,
+				436A89A6162BAD1C00749B99 /* zip.h */,
+			);
+			path = minizip;
 			sourceTree = "<group>";
 		};
 		6A830A9C145C55310099316F /* Pic */ = {
@@ -1017,6 +1070,8 @@
 		6A912B9613F76F3E00C39D3A = {
 			isa = PBXGroup;
 			children = (
+				436A899B162BAD0D00749B99 /* zip */,
+				436A8999162BA56B00749B99 /* libsqlite3.0.dylib */,
 				6A89B20814C4503100D67F84 /* Default.png */,
 				6A89B20514C4502B00D67F84 /* Default@2x.png */,
 				C48BACB6148877C200C5F48E /* AppStore.png */,
@@ -1603,6 +1658,11 @@
 				A9C619D115E51E3D00F75740 /* SettingController.m in Sources */,
 				430071431626B7F5006D4E55 /* EGORefreshTableHeaderView.m in Sources */,
 				430071561627170E006D4E55 /* PhaseController.m in Sources */,
+				436A89A9162BAD1C00749B99 /* ioapi.c in Sources */,
+				436A89AA162BAD1C00749B99 /* mztools.c in Sources */,
+				436A89AB162BAD1C00749B99 /* unzip.c in Sources */,
+				436A89AC162BAD1C00749B99 /* zip.c in Sources */,
+				436A89AD162BAD1C00749B99 /* ZipArchive.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

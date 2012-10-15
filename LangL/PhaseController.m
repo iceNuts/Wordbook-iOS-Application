@@ -35,8 +35,24 @@
 	downloadProgress = nil;
 	downloadCell = nil;
 	
-	//Draw custom tableview
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
+	NSDictionary* dict = [[NSDictionary alloc] initWithContentsOfFile:filePath];
+	if([dict objectForKey: mainDelegate.CurrWordBookID] == nil){
+		NSDictionary *new_dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
+		[new_dict writeToFile:filePath atomically:YES];
+		[new_dict release];
+		mp3done = NO;
+	}else if([[dict objectForKey: mainDelegate.CurrWordBookID] isEqualToString:@"0"]){
+		mp3done = NO;
+	}else{
+		mp3done = YES;
+	}
+	[dict release];
+	//Draw custom tableview
 	mainDelegate.PhaseCount = mainDelegate.CurrPhaseIdx + 1;
 	
     UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_main_green.png"]];
@@ -63,8 +79,8 @@
 }
 
 - (void)dealloc {
+	[super dealloc];
     [myTableView release];
-    [super dealloc];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -84,9 +100,9 @@
 	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
-	NSString *dbDir = [bookDir stringByAppendingString:@".pdf"];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
 	
-	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir])
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done)
 		return mainDelegate.PhaseCount;
     return mainDelegate.PhaseCount+1;
 }
@@ -117,9 +133,9 @@
 	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
-	NSString *dbDir = [bookDir stringByAppendingString:@".pdf"];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
 	
-	if(indexPath.row ==mainDelegate.PhaseCount && ![[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+	if(indexPath.row ==mainDelegate.PhaseCount && (![[NSFileManager defaultManager] fileExistsAtPath:dbDir] || mp3done == NO)){
 		NSString *bookIcon;
 		int dictType = mainDelegate.CurrDictType;
 		switch (dictType) {
@@ -191,8 +207,12 @@
 			cell.userInteractionEnabled = YES;
 			if(isDownloading)
 				hint1.text = @"点击取消下载";
-			else
-				hint1.text = @"下载离线词库";
+			else{
+				if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done == NO)
+					hint1.text = @"下载离线语音";
+				else
+					hint1.text = @"下载离线词库";
+			}
 		}
 		downloadCell = cell;
 		return  cell;
@@ -240,7 +260,6 @@
 			if(downloadProgress){
 				downloadProgress.progress = 0.0;
 				downloadProgress.hidden = YES;
-				[downloadProgress release];
 				[myTableView reloadData];
 			}
 			return;
@@ -262,7 +281,17 @@
 }
 
 - (IBAction)showDownloadActionSheet:(id)sender{
-	UIActionSheet *downloadInfoSheet = [[UIActionSheet alloc] initWithTitle:@"下载选项" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"仅词汇(大约5MB)",@"词汇＋音频(大约20MB)",nil];
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+	UIActionSheet *downloadInfoSheet;
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done == NO){
+		downloadInfoSheet = [[UIActionSheet alloc] initWithTitle:@"下载选项" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"下载离线音频(大约15M)",nil];
+	}else{
+		downloadInfoSheet = [[UIActionSheet alloc] initWithTitle:@"下载选项" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"仅词汇(大约5MB)",@"词汇＋音频(大约20MB)",nil];
+	}
 	downloadInfoSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
 	[downloadInfoSheet showInView:self.view];
 	[downloadInfoSheet release];
@@ -270,11 +299,20 @@
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
 	
-	if(buttonIndex == 2)
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+	
+	if((buttonIndex == 2 && ![[NSFileManager defaultManager] fileExistsAtPath:dbDir]) || ([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && buttonIndex == 1))
 		return;
 	if(buttonIndex == 0){
 		//Download words only
-		isDataWithMusic = NO;
+		if([[NSFileManager defaultManager] fileExistsAtPath:dbDir])
+			isDataWithMusic = YES;
+		else
+			isDataWithMusic = NO;
 	}else{
 		//Download mp3+words
 		isDataWithMusic = YES;
@@ -290,10 +328,12 @@
     if([indexPath row] == mainDelegate.PhaseCount){
 		if(isDownloading){
 			if(downloadCell){
+				[downloadProgress release];
 				downloadProgress = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
 				downloadProgress.progress = 0.0;
 				downloadProgress.frame = CGRectMake(110, 30, 150, 30);
-				[downloadCell.contentView addSubview:downloadProgress];							
+				if(downloadProgress)
+					[downloadCell.contentView addSubview:downloadProgress];
 			}
 			//Start download
 			[mainDelegate showDownloadInfo];
@@ -307,46 +347,51 @@
 	//if isDownloading, disable other UI interaction;
 	if(isDataWithMusic){
 		//Music + Words
-		[downloadQueue cancelAllOperations];
-		downloadQueue = [ASINetworkQueue queue];
-		[downloadQueue setDelegate: self];
-		[downloadQueue setDownloadProgressDelegate:downloadProgress];
-		[downloadQueue setQueueDidFinishSelector:@selector(downloadQueueFinished)];
-		//If one file failed, cancel all operations
-		[downloadQueue setRequestDidFailSelector:@selector(downloadQueueFailed)];
-		//Add http requests into downloadQueue
-		
-		//Words
 		NSString* downloadFilePath;
 		//Example
-		downloadFilePath = @"http://www.udel.edu/CSC/pdf/NurseResumes.pdf";
+		downloadFilePath = [NSString stringWithFormat:@"http://www.langlib.com/mobiledb/%d.zip",mainDelegate.CurrDictType];
 		NSURL *url = [NSURL URLWithString: downloadFilePath];
 		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
-		NSString *dbDir = [bookDir stringByAppendingString:@".pdf"];
+		NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+		NSString *dbZipDir = [bookDir stringByAppendingString:@".zip"];
+		//Don't need to download
+		if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+			[self performSelector:@selector(fetchMp3Data)];
+			return;
+		}
 		ASIHTTPRequest* request = [ASIHTTPRequest requestWithURL:url];
-		[request setDownloadDestinationPath:dbDir];
-		[downloadQueue addOperation:request];
-//		//Music
-//		[[NSFileManager defaultManager] createDirectoryAtPath:bookDir withIntermediateDirectories:YES attributes:nil error:nil];
-//		NSString *currWordProto = [[mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]] objectForKey:@"W"];
-//		url = [NSURL URLWithString:[NSString stringWithFormat:@"http://www.langlib.com/voice/%@/%@.mp3", [currWordProto substringToIndex:1], [[currWordProto stringByReplacingOccurrencesOfString:@"*" withString:@""] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
-//
-		[downloadQueue go];
+		[request setDownloadDestinationPath:dbZipDir];
+		[request setCompletionBlock:^{
+			//unzip zip to db
+			ZipArchive *zipArchive = [[ZipArchive alloc] init];
+			[zipArchive UnzipOpenFile:dbZipDir];
+			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
+			[zipArchive UnzipCloseFile];
+			[zipArchive release];
+			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
+			[self performSelectorOnMainThread:@selector(fetchMp3Data) withObject:nil waitUntilDone:1.0f];
+		}];
+		[downloadRequest setFailedBlock:^{
+			isDownloading = NO;
+			[mainDelegate showNetworkFailed];
+			[myTableView reloadData];
+		}];
+		[request startAsynchronous];
 	}else{
 		//Words ONLY
 		NSString* downloadFilePath;
 		//Example
-		downloadFilePath = @"http://www.udel.edu/CSC/pdf/NurseResumes.pdf";
+		downloadFilePath = [NSString stringWithFormat:@"http://www.langlib.com/mobiledb/%d.zip",mainDelegate.CurrDictType];
 		NSURL *url = [NSURL URLWithString: downloadFilePath];
 		//assume db.dir
 		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
-		NSString *dbDir = [bookDir stringByAppendingString:@".pdf"];
+		NSString *dbZipDir = [bookDir stringByAppendingString:@".zip"];
 		downloadRequest = [ASIHTTPRequest requestWithURL:url];
-		[downloadRequest setDownloadDestinationPath:dbDir];
+		[downloadRequest setDownloadDestinationPath:dbZipDir];
 		[downloadRequest setDownloadProgressDelegate: downloadProgress];
 		[downloadRequest setCompletionBlock:^{
 			//Done then reload tableview
@@ -355,10 +400,15 @@
 			//Reset isDownloading
 			isDownloading = NO;
 			downloadCell = nil;
-			if(downloadProgress)
-				[downloadProgress release];
 			//Notify user successful
 			[mainDelegate showDownloadSuccess];
+			//unzip zip to db
+			ZipArchive *zipArchive = [[ZipArchive alloc] init];
+			[zipArchive UnzipOpenFile:dbZipDir];
+			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
+			[zipArchive UnzipCloseFile];
+			[zipArchive release];
+			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
 			[myTableView reloadData];
 		}];
 		[downloadRequest setFailedBlock:^{
@@ -370,35 +420,104 @@
 	}
 }
 
+- (void)fetchMp3Data{
+	downloadQueue = [ASINetworkQueue queue];
+	[downloadQueue setDelegate: self];
+	[downloadQueue setDownloadProgressDelegate:downloadProgress];
+	[downloadQueue setQueueDidFinishSelector:@selector(downloadQueueFinished)];
+	//If one file failed, cancel all operations
+	[downloadQueue setRequestDidFailSelector:@selector(downloadQueueFailed:)];
+	[downloadQueue setShouldCancelAllRequestsOnFailure:NO];
+	//fetch mp3 data
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+	sqlite3* database;
+	sqlite3_stmt *statement;
+	if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK) {
+		NSLog(@"open sqlite db ok.");
+		const char *selectSql="select WordProto from WordMain";
+		if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
+			NSLog(@"select ok.");
+		}
+		while (sqlite3_step(statement)==SQLITE_ROW) {
+			NSString *WordProto=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
+			//Create request&Add to queue
+			NSString* mp3string = [NSString stringWithFormat:@"http://www.langlib.com/voice/%@/%@.mp3",[WordProto substringToIndex:1], [[WordProto stringByReplacingOccurrencesOfString:@"*" withString:@""] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+			NSURL* mp3url = [NSURL URLWithString:mp3string];
+			//create mp3 path
+			NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+			NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+			NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", mainDelegate.CurrWordBookID]];
+			NSString *bookmp3 = [bookDir stringByAppendingPathComponent:@"mp3"];
+			[[NSFileManager defaultManager] createDirectoryAtPath:bookmp3 withIntermediateDirectories:YES attributes:nil error:nil];
+			NSString *mp3dir = [bookmp3 stringByAppendingPathComponent:[WordProto stringByAppendingString:@".mp3"]];
+			if(![[NSFileManager defaultManager] fileExistsAtPath:mp3dir]){
+				ASIHTTPRequest *mp3Request = [ASIHTTPRequest requestWithURL:mp3url];
+				[mp3Request setDownloadDestinationPath:mp3dir];
+				[downloadQueue addOperation:mp3Request];
+			}
+		}
+		//Assume mp3done = YES;
+		mp3done = YES;
+		[downloadQueue go];
+		sqlite3_close(database);
+	}
+
+}
+
 - (void)stopDownloadData{
 	if(isDataWithMusic){
-		[downloadQueue cancelAllOperations];
-		[downloadQueue release];
+		mp3done = NO;
+		downloadCanceled = YES;
+		if(downloadQueue)
+			[downloadQueue cancelAllOperations];
 	}else{
 		[downloadRequest clearDelegatesAndCancel];
-		[downloadRequest release];
 	}
 }
 
 - (void)downloadQueueFinished{
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-	if(isDownloading){
+	if(mp3done == NO && isDownloading){
+		isDownloading = NO;
+		[mainDelegate showNetworkFailed];
+		//write to plist to mark not done for mp3
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
+		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
+		[dict writeToFile:filePath atomically:YES];
+		[dict release];
+		if(downloadCanceled){
+			downloadCanceled = NO;
+			[mainDelegate showNetworkFailed];
+		}
+		[myTableView reloadData];
+		return;
+	}else if(isDownloading && mp3done == YES){
 		isDownloading = NO;
 		downloadCell = nil;
-		if(downloadProgress)
-			[downloadProgress release];
 		//Notify user successful
 		[mainDelegate showDownloadSuccess];
+		mp3done = YES;
+		//write to plist to mark done for mp3
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
+		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"1", nil] forKeys: [[NSArray alloc] initWithObjects:mainDelegate.CurrWordBookID, nil]];
+		[dict writeToFile:filePath atomically:YES];
+		[dict release];
 		[myTableView reloadData];
 	}
 }
 
-- (void)downloadQueueFailed{
-	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-	isDownloading = NO;
-	[downloadQueue cancelAllOperations];
-	[mainDelegate showNetworkFailed];
-	[myTableView reloadData];
+- (void)downloadQueueFailed: (ASIHTTPRequest *)request{
+	if(!request.error.code == ASIUnableToCreateRequestErrorType){
+		mp3done = NO;
+	}
 }
 
 
