@@ -454,8 +454,7 @@
 			//create mp3 path
 			NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 			NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
-			NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", mainDelegate.CurrWordBookID]];
-			NSString *bookmp3 = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+			NSString *bookmp3 = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
 			[[NSFileManager defaultManager] createDirectoryAtPath:bookmp3 withIntermediateDirectories:YES attributes:nil error:nil];
 			NSString *mp3dir = [bookmp3 stringByAppendingPathComponent:[WordProto stringByAppendingString:@".mp3"]];
 			if(![[NSFileManager defaultManager] fileExistsAtPath:mp3dir]){
