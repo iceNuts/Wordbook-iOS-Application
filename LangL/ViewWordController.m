@@ -418,16 +418,16 @@
 	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", mainDelegate.CurrWordBookID]];
-	NSString *bookmp3 = [bookDir stringByAppendingPathComponent:@"mp3"];
+	NSString *bookmp3 = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
 	[[NSFileManager defaultManager] createDirectoryAtPath:bookmp3 withIntermediateDirectories:YES attributes:nil error:nil];
 	NSString *mp3dir = [bookmp3 stringByAppendingPathComponent:[currWordProto stringByAppendingString:@".mp3"]];
-    
     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp3dir];
     if (self.player.retainCount > 0)
         [player release];
     
     if (fileExists)
     {
+		NSLog(@"iceNuts: You are off-line, boy");
         NSError *error;
         player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL
             fileURLWithPath:mp3dir] error:&error]; 
