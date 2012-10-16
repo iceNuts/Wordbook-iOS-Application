@@ -108,36 +108,59 @@
         for (int x = 0; x < mainDelegate.WordList.count; x++)
             wordIDs[x] = [NSString stringWithString: [[mainDelegate.WordList objectAtIndex: x] objectForKey:@"WID"]];
         NSArray *wordIDArr = [NSArray arrayWithObjects:wordIDs count:mainDelegate.WordList.count];
-        
-        NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 wordIDArr, @"wordIDList",
-                                [NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], @"dictType",
-                                 nil];
-        
-        //RPC JSON
-        NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
-    
-        NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/quiz/ws_WordQuiz.asmx/FetchFixedWordList"];
-        
-        __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-        [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
-        [request addRequestHeader:@"Content-Type" value:@"application/json"];    
-        [request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
-        [request setCompletionBlock:^{   
-            NSString *responseString = [request responseString];
-            NSDictionary* responseDict = [responseString JSONValue];
-            mainDelegate.QuizList = (NSMutableArray *) [responseDict objectForKey:@"d"];
-            mainDelegate.QuizListID = mainDelegate.CurrListID;
-            [loadingHint stopAnimating];
-            [self DisplayCurrWord];
-        }];
-        [request setFailedBlock:^{
-            LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-            [mainDelegate showNetworkFailed];
-            
-        }];
-        [request startAsynchronous];
-    }
+				
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+		NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+		
+		mainDelegate.QuizList = [[NSMutableArray alloc] init];
+		
+		for(NSString* wordID in wordIDArr){
+			NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+			//fetch data in db
+			if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+				sqlite3* database;
+				sqlite3_stmt *statement;
+				if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK){
+					NSString *tmp = [[@"'" stringByAppendingString:wordID] stringByAppendingString:@"'"];
+					const char *selectSql= [[@"select * from QuizMode where WordID=" stringByAppendingString:tmp] cStringUsingEncoding:NSUTF8StringEncoding];
+					if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
+						NSLog(@"select ok.");
+					}
+					while (sqlite3_step(statement)==SQLITE_ROW){
+						//set dict & add it to array
+						NSString *WordProto = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
+						NSInteger WbType = mainDelegate.CurrDictType;
+						NSInteger CorrectIdx;
+						//now randomly sort words
+						NSMutableArray *SubChoice = [[NSMutableArray alloc] init];
+						int j = fabs(arc4random()%12);
+						int hash[][4]={{2,3,4,5},{3,4,2,5},{5,4,3,2},{3,2,4,5},{4,2,5,3},{2,3,5,4},{5,2,4,3},{2,3,5,4},{2,5,3,4},{4,2,3,5},{5,3,2,4},{3,4,5,2},{2,5,4,3}};
+						//put meaning into SubChoice
+						for(int i = 0; i < 4; i++){
+							NSString *mean = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, hash[j][i]) encoding:NSUTF8StringEncoding];
+							[SubChoice addObject:mean];
+							if(hash[j][i] == 2){
+								CorrectIdx = i;
+							}
+						}
+						[dict setObject:WordProto forKey:@"WordProto"];
+						[dict setObject:[NSString stringWithFormat:@"%d",WbType] forKey:@"WbType"];
+						[dict setObject:wordID forKey:@"WordID"];
+						[dict setObject:SubChoice forKey:@"SubChoice"];
+						[dict setObject:[NSString stringWithFormat:@"%d", CorrectIdx] forKey:@"CorrectIdx"];
+						
+					}
+				}
+				[mainDelegate.QuizList addObject:dict];
+			}
+		}
+				
+		mainDelegate.QuizListID = mainDelegate.CurrListID;
+		[loadingHint stopAnimating];
+		[self DisplayCurrWord];
+	}
     else{
         [loadingHint stopAnimating];
         [self DisplayCurrWord];
@@ -507,11 +530,14 @@
     isPlaying = YES;
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     NSString *currWordProto = [[mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]] objectForKey:@"W"];
-    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                                  NSUserDomainMask, YES) objectAtIndex:0];
-    
-    NSString *mp3File = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp3", currWordProto]];
-    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp3File]; 
+    	
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookmp3 = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	[[NSFileManager defaultManager] createDirectoryAtPath:bookmp3 withIntermediateDirectories:YES attributes:nil error:nil];
+	NSString *mp3dir = [bookmp3 stringByAppendingPathComponent:[currWordProto stringByAppendingString:@".mp3"]];
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp3dir];
+	
     if (self.player.retainCount > 0)
         [player release];
     
@@ -519,7 +545,7 @@
     {
         NSError *error;
         player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL
-                                                               fileURLWithPath:mp3File] error:&error]; 
+                                                               fileURLWithPath:mp3dir] error:&error];
         [player play];        
     }
     else
@@ -528,9 +554,9 @@
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://www.langlib.com/voice/%@/%@.mp3", [currWordProto substringToIndex:1], [[currWordProto stringByReplacingOccurrencesOfString:@"*" withString:@""] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
         
         NSData *soundData = [NSData dataWithContentsOfURL:url];
-        [soundData writeToFile:mp3File atomically:YES];
+        [soundData writeToFile:mp3dir atomically:YES];
         player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL
-                                                               fileURLWithPath:mp3File] error:&error];  
+                                                               fileURLWithPath:mp3dir] error:&error];
         [player play];
     }
     isPlaying = NO;

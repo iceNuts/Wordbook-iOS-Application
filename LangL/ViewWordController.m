@@ -558,7 +558,7 @@
     }];
     [request setFailedBlock:^{
         LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-        [mainDelegate showNetworkFailed];
+//        [mainDelegate showNetworkFailed];
     }];
     [request startAsynchronous];
 }
@@ -666,7 +666,7 @@
     }];
     [request setFailedBlock:^{
         LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-        [mainDelegate showNetworkFailed];
+//        [mainDelegate showNetworkFailed];
     }];
     [request startAsynchronous];
 

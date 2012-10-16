@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "QuizChoiceButton.h"
 #import "AVFoundation/AVAudioPlayer.h"
+#import "sqlite3.h"
 
 @interface QuizModeController : UIViewController<UIAlertViewDelegate>{
     NSDictionary *quizDict;

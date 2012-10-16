@@ -57,6 +57,8 @@
 	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
 	NSString *wordlistDir = [[phaseDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrListID]] stringByAppendingString:@".plist"];
 	mainDelegate.WordList = [[NSMutableArray alloc] initWithContentsOfFile:wordlistDir];
+	
+	//if not exist, try reading book xml
 		
 	if(mainDelegate.WordList == nil){
 		//0: init   1: asc  2: desc   3;fam asc  4 fam desc  5: random
