@@ -10,6 +10,7 @@
 #import "EditNoteController.h"
 #import "GoToWordController.h"
 #import "AVFoundation/AVAudioPlayer.h"
+#import "sqlite3.h"
 
 @interface ViewWordController : UIViewController<EditNoteModalDelegate, UIAlertViewDelegate> {
     UILabel *wordProto;

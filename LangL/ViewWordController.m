@@ -462,10 +462,66 @@
     
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     NSDictionary *currWord = [mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]];
-    
+	
+	//query in db first
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+		sqlite3* database;
+		sqlite3_stmt *statement;
+		NSMutableArray* exampleSens = [[NSMutableArray alloc] init];
+		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK){
+			NSLog(@"open sqlite db ok.");
+			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
+			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
+			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
+			NSLog(@"%s", selectSql);
+			if (result!=SQLITE_OK) {
+				 NSLog(@"Prepare-error #%i: %s", result, sqlite3_errmsg(database));
+			}
+			while (sqlite3_step(statement)==SQLITE_ROW) {
+				NSString *WordID = [[@"'" stringByAppendingString:[[NSString alloc] initWithCString:(char*)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding]] stringByAppendingString:@"'"];
+				const char *selectQ= [[@"select Speech,ENMeaning from EnglishMean where MainID=" stringByAppendingString: WordID] cStringUsingEncoding:NSUTF8StringEncoding];
+				NSLog(@"%s", selectQ);
+				sqlite3_stmt *statement;
+				if (sqlite3_prepare_v2(database, selectQ, -1, &statement, nil)==SQLITE_OK) {
+					NSLog(@"Time to create NSArray");
+					while (sqlite3_step(statement) == SQLITE_ROW) {
+						NSString *Speech=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
+						NSString *En = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
+						NSLog(@"%@,%@", Speech,En);
+						NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
+						[tmpDict setObject:Speech forKey:@"WordSpeech"];
+						[tmpDict setObject:En forKey:@"Explaination"];
+						[exampleSens addObject:tmpDict];
+						[tmpDict release];
+					}
+					sqlite3_finalize(statement);
+				}
+				
+			}
+			sqlite3_finalize(statement);
+		}
+		sqlite3_close(database);
+			if([exampleSens count]){
+				int rowCounter = 0;
+				for (NSDictionary* expSen in exampleSens) {
+					rowCounter++;
+					[self.englishExpHtml appendFormat:@"%d.(%@)%@", rowCounter, [expSen objectForKey:@"WordSpeech"], [expSen objectForKey:@"Explaination"]];
+					[self.englishExpHtml appendString:@"<br />"];
+				}
+				if ([self.englishExpHtml compare:@""] == NSOrderedSame)
+					[self.englishExpHtml setString:@"(此单词没有英文解释)"];
+				[extraData loadHTMLString: [NSString stringWithFormat:htmlPrefix, englishExpHtml] baseURL:nil];
+				[exampleSens release];
+				return;
+		}
+	}
     NSDictionary *reqDict;
     NSURL *url;
-    if ((mainDelegate.CurrDictType == 10) || (mainDelegate.CurrDictType == 11) || (mainDelegate.CurrDictType == 12))
+    if((mainDelegate.CurrDictType == 10) || (mainDelegate.CurrDictType == 11) || (mainDelegate.CurrDictType == 12))
     {
         reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                    [currWord objectForKey:@"WID"], @"wordID",
@@ -482,11 +538,11 @@
     }
     
     
-    //RPC JSON
-    NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
+	//RPC JSON
+    NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];    
+    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+    [request addRequestHeader:@"Content-Type" value:@"application/json"];
     [request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
     [request setCompletionBlock:^{
         NSString *responseString = [request responseString];
@@ -496,19 +552,19 @@
         int rowCounter = 0;
         for (NSDictionary* expSen in exampleSens) {
             rowCounter++;
-            [self.englishExpHtml appendFormat:@"%d.(%@)%@", rowCounter, [expSen objectForKey:@"WordSpeech"], [expSen objectForKey:@"Explaination"]];            
-            [self.englishExpHtml appendString:@"<br />"];      
-        }       
+            [self.englishExpHtml appendFormat:@"%d.(%@)%@", rowCounter, [expSen objectForKey:@"WordSpeech"], [expSen objectForKey:@"Explaination"]];
+            [self.englishExpHtml appendString:@"<br />"];
+        }
         if ([self.englishExpHtml compare:@""] == NSOrderedSame)
             [self.englishExpHtml setString:@"(此单词没有英文解释)"];
-        [extraData loadHTMLString: [NSString stringWithFormat:htmlPrefix, englishExpHtml] baseURL:nil];    
+        [extraData loadHTMLString: [NSString stringWithFormat:htmlPrefix, englishExpHtml] baseURL:nil];
         
     }];
     [request setFailedBlock:^{
-        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
+        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
         [mainDelegate showNetworkFailed];
     }];
-    [request startAsynchronous];   
+    [request startAsynchronous];
 }
 
 - (IBAction)btnShowExpSenTouched:(id)sender {
@@ -522,6 +578,66 @@
     
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     NSDictionary *currWord = [mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]];
+	
+	//query in db first
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+		sqlite3* database;
+		sqlite3_stmt *statement;
+		NSMutableArray* exampleSens = [[NSMutableArray alloc] init];
+		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK){
+			NSLog(@"open sqlite db ok.");
+			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
+			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
+			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
+			NSLog(@"%s", selectSql);
+			if (result!=SQLITE_OK) {
+				NSLog(@"Prepare-error #%i: %s", result, sqlite3_errmsg(database));
+			}
+			while (sqlite3_step(statement)==SQLITE_ROW) {
+				NSString *WordID = [[@"'" stringByAppendingString:[[NSString alloc] initWithCString:(char*)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding]] stringByAppendingString:@"'"];
+				const char *selectQ= [[@"select SentenceEN,SentenceCN from ExampleSentence where MainID=" stringByAppendingString: WordID] cStringUsingEncoding:NSUTF8StringEncoding];
+				NSLog(@"%s", selectQ);
+				sqlite3_stmt *statement;
+				if (sqlite3_prepare_v2(database, selectQ, -1, &statement, nil)==SQLITE_OK) {
+					NSLog(@"Time to create NSArray");
+					while (sqlite3_step(statement) == SQLITE_ROW) {
+						NSString *ESentence=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
+						NSString *CSentence = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
+						NSLog(@"%@,%@", ESentence,CSentence);
+						NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
+						[tmpDict setObject:ESentence forKey:@"ESentence"];
+						[tmpDict setObject:CSentence forKey:@"CSentence"];
+						[exampleSens addObject:tmpDict];
+						[tmpDict release];
+					}
+					sqlite3_finalize(statement);
+				}
+				
+			}
+			sqlite3_finalize(statement);
+		}
+		sqlite3_close(database);
+		if([exampleSens count]){
+			int rowCounter = 0;
+			for (NSDictionary* expSen in exampleSens) {
+				rowCounter++;
+				[self.exampleSenHtml appendFormat:@"%d.%@", rowCounter, [expSen objectForKey:@"ESentence"]];
+				[self.exampleSenHtml appendString:@"<br />"];
+				[self.exampleSenHtml appendFormat:@"&nbsp;&nbsp;%@", [expSen objectForKey:@"CSentence"]];
+				[self.exampleSenHtml appendString:@"<br />"];
+			}
+			
+			if ([exampleSenHtml compare:@""] == NSOrderedSame)
+				[self.exampleSenHtml setString:@"(此单词没有例句)"];
+			[extraData loadHTMLString: [NSString stringWithFormat:htmlPrefix, exampleSenHtml] baseURL:nil];
+			[exampleSens release];
+			return;
+		}
+	}
     
     NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                              [currWord objectForKey:@"RID"], @"dbRowID",
