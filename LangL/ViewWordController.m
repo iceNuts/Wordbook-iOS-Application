@@ -477,21 +477,17 @@
 			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
 			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
 			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
-			NSLog(@"%s", selectSql);
 			if (result!=SQLITE_OK) {
 				 NSLog(@"Prepare-error #%i: %s", result, sqlite3_errmsg(database));
 			}
 			while (sqlite3_step(statement)==SQLITE_ROW) {
 				NSString *WordID = [[@"'" stringByAppendingString:[[NSString alloc] initWithCString:(char*)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding]] stringByAppendingString:@"'"];
 				const char *selectQ= [[@"select Speech,ENMeaning from EnglishMean where MainID=" stringByAppendingString: WordID] cStringUsingEncoding:NSUTF8StringEncoding];
-				NSLog(@"%s", selectQ);
 				sqlite3_stmt *statement;
 				if (sqlite3_prepare_v2(database, selectQ, -1, &statement, nil)==SQLITE_OK) {
-					NSLog(@"Time to create NSArray");
 					while (sqlite3_step(statement) == SQLITE_ROW) {
 						NSString *Speech=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
 						NSString *En = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
-						NSLog(@"%@,%@", Speech,En);
 						NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
 						[tmpDict setObject:Speech forKey:@"WordSpeech"];
 						[tmpDict setObject:En forKey:@"Explaination"];
@@ -593,21 +589,18 @@
 			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
 			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
 			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
-			NSLog(@"%s", selectSql);
 			if (result!=SQLITE_OK) {
 				NSLog(@"Prepare-error #%i: %s", result, sqlite3_errmsg(database));
 			}
 			while (sqlite3_step(statement)==SQLITE_ROW) {
 				NSString *WordID = [[@"'" stringByAppendingString:[[NSString alloc] initWithCString:(char*)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding]] stringByAppendingString:@"'"];
 				const char *selectQ= [[@"select SentenceEN,SentenceCN from ExampleSentence where MainID=" stringByAppendingString: WordID] cStringUsingEncoding:NSUTF8StringEncoding];
-				NSLog(@"%s", selectQ);
 				sqlite3_stmt *statement;
 				if (sqlite3_prepare_v2(database, selectQ, -1, &statement, nil)==SQLITE_OK) {
 					NSLog(@"Time to create NSArray");
 					while (sqlite3_step(statement) == SQLITE_ROW) {
 						NSString *ESentence=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
 						NSString *CSentence = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
-						NSLog(@"%@,%@", ESentence,CSentence);
 						NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
 						[tmpDict setObject:ESentence forKey:@"ESentence"];
 						[tmpDict setObject:CSentence forKey:@"CSentence"];
