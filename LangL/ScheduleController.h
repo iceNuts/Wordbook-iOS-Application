@@ -7,12 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EGORefreshTableHeaderView.h"
 
-@interface ScheduleController : UIViewController<UITableViewDelegate, UITableViewDataSource>{
+@interface ScheduleController : UIViewController<UITableViewDelegate, UITableViewDataSource,EGORefreshTableHeaderDelegate>{
     UITableView *scheduleView;
     bool hasPaid;
     NSString *currDateStr;
     UIActivityIndicatorView *loadingIcon;
+	EGORefreshTableHeaderView *_refreshHeaderView;
 }
 
 @property (nonatomic, retain) UITableView *scheduleView;

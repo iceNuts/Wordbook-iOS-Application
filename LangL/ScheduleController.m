@@ -54,8 +54,18 @@
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
 	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
 	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+	NSString *tmp = [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType];
+	NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
 	
-	mainDelegate.ScheduleList = [NSMutableArray arrayWithContentsOfFile:filePath];
+	//check time to see if need to refresh
+	NSDictionary* fileData = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:nil];
+	NSDate* fileDate = [fileData objectForKey:NSFileModificationDate];
+	NSDate* today = [NSDate date];
+	//1 less than 3h 2 db exist or must fetch online
+	if (![[[today dateByAddingTimeInterval:-(60*60*3)] earlierDate:fileDate] isEqualToDate:fileDate] && [[NSFileManager defaultManager] fileExistsAtPath:dbDir]) {
+        //file is less than 3 hours old, use this file.
+		mainDelegate.ScheduleList = [NSMutableArray arrayWithContentsOfFile:filePath];	
+    }
 }
 
 - (void)viewDidLoad
@@ -104,6 +114,14 @@
 		scheduleView.opaque = NO;
 		scheduleView.backgroundView = nil;
 		
+		//Add pull to refresh header
+		if(_refreshHeaderView == nil){
+			EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.scheduleView.bounds.size.height, self.view.frame.size.width, self.scheduleView.bounds.size.height)];
+			view.delegate = self;
+			[self.scheduleView addSubview:view];
+			_refreshHeaderView = view;
+			[view release];
+		}
 		UIBarButtonItem *statButton = [[UIBarButtonItem alloc] initWithTitle:@"状态" style:UIBarButtonItemStylePlain target:self action:@selector(btnViewStat)];
 		self.navigationItem.rightBarButtonItem = statButton;
 		[statButton release];
@@ -136,7 +154,6 @@
 
 - (void)requestFinished:(ASIHTTPRequest *)request
 {
-    [loadingIcon stopAnimating];
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];   
     // Use when fetching text data
     NSString *responseString = [request responseString];
@@ -157,7 +174,32 @@
 		[[NSFileManager defaultManager] createDirectoryAtPath: phaseDir withIntermediateDirectories:YES attributes:nil error:&error];
     }
 	
-	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"]; 	
+	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+	//Compare then set the value
+	NSMutableArray* oldScheduleList;
+	if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+		//load file and update the value for ScheduleList
+		oldScheduleList = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+		for(NSDictionary* oldData in oldScheduleList){
+			for(NSMutableDictionary* newData in mainDelegate.ScheduleList){
+				if([[newData objectForKey:@"CDate"] isEqualToString:[oldData objectForKey:@"CDate"]]){
+					NSMutableArray* newCompleteArray = [newData objectForKey:@"NL"];
+					NSArray* oldCompleteArray = [oldData objectForKey:@"NL"];
+					//compare 
+					for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+						for(NSDictionary* oldCompleteDict in oldCompleteArray){
+							if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+								[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+								break;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+	
 	[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
 				
     scheduleView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
@@ -174,8 +216,19 @@
     UIBarButtonItem *statButton = [[UIBarButtonItem alloc] initWithTitle:@"状态" style:UIBarButtonItemStylePlain target:self action:@selector(btnViewStat)];          
     self.navigationItem.rightBarButtonItem = statButton;
     [statButton release];
+	
+	//Add pull to refresh heaer if db exist
+	NSString *tmp = [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType];
+	NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
+	if(_refreshHeaderView == nil && [[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+		EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.scheduleView.bounds.size.height, self.view.frame.size.width, self.scheduleView.bounds.size.height)];
+		view.delegate = self;
+		[self.scheduleView addSubview:view];
+		_refreshHeaderView = view;
+		[view release];
+	}
     
-    NavigateToNextButton *btnViewStat = [[NavigateToNextButton alloc] init];    
+    NavigateToNextButton *btnViewStat = [[NavigateToNextButton alloc] init];
     [btnViewStat setTitle:@"  统 计" forState:UIControlStateNormal]; 
     
     [btnViewStat addTarget:self action:@selector(btnViewStat) forControlEvents:UIControlEventTouchUpInside];     
@@ -183,14 +236,52 @@
     UIBarButtonItem* viewStatButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnViewStat]; 
     [self.navigationItem  setRightBarButtonItem:viewStatButtonItem]; 
     [viewStatButtonItem release]; 
-    [btnViewStat release]; 
+    [btnViewStat release];
+	//Rrefresh user data;
+	[self performSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)];
 }
 
 - (void)requestFailed:(ASIHTTPRequest *)request
 {
     [loadingIcon stopAnimating];
-    LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-    [mainDelegate showNetworkFailed];
+    LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
+	NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+	
+	mainDelegate.ScheduleList = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+	
+	if(mainDelegate.ScheduleList && [mainDelegate.ScheduleList count]){
+		scheduleView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
+		
+		scheduleView.delegate = self;
+		scheduleView.dataSource = self;
+		[self.view addSubview:self.scheduleView];
+		
+		scheduleView.separatorColor = [UIColor clearColor];
+		scheduleView.backgroundColor = [UIColor clearColor];
+		scheduleView.opaque = NO;
+		scheduleView.backgroundView = nil;
+		
+		UIBarButtonItem *statButton = [[UIBarButtonItem alloc] initWithTitle:@"状态" style:UIBarButtonItemStylePlain target:self action:@selector(btnViewStat)];
+		self.navigationItem.rightBarButtonItem = statButton;
+		[statButton release];
+		
+		NavigateToNextButton *btnViewStat = [[NavigateToNextButton alloc] init];
+		[btnViewStat setTitle:@"  统 计" forState:UIControlStateNormal];
+		
+		[btnViewStat addTarget:self action:@selector(btnViewStat) forControlEvents:UIControlEventTouchUpInside];
+		//定制自己的风格的  UIBarButtonItem
+		UIBarButtonItem* viewStatButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btnViewStat];
+		[self.navigationItem  setRightBarButtonItem:viewStatButtonItem];
+		[viewStatButtonItem release];
+		[btnViewStat release];
+	}else{
+		[mainDelegate showNetworkFailed];
+	}
 }
 
 
@@ -386,6 +477,153 @@
         [alert release];  
     }
 }
+
+#pragma mark -
+#pragma mark EGORefreshTableHeaderDelegate Methods
+
+- (void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView*)view{
+	//1 refresh schedule view
+	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+							 mainDelegate.CurrUserID, @"userID",
+							 mainDelegate.CurrWordBookID, @"wordBookID",
+							 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"phaseIdx",
+							 nil];
+	
+	NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+	NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListSchedule"];
+    __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+	[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+	[request addRequestHeader:@"Content-Type" value:@"application/json"];
+	[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+	[request setCompletionBlock:^{
+		NSString *responseString = [request responseString];
+		NSDictionary* responseDict = [responseString JSONValue];
+		mainDelegate.ScheduleList = (NSMutableArray *) [responseDict objectForKey:@"d"];
+		//write phase data to plist
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
+		
+		//create phaseDir
+		NSError *error;
+		if (![[NSFileManager defaultManager] fileExistsAtPath:phaseDir]){
+			[[NSFileManager defaultManager] createDirectoryAtPath: phaseDir withIntermediateDirectories:YES attributes:nil error:&error];
+		}
+		
+		NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+		//Compare then set the value
+		NSMutableArray* oldScheduleList;
+		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+			//load file and update the value for ScheduleList
+			oldScheduleList = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+			for(NSDictionary* oldData in oldScheduleList){
+				for(NSMutableDictionary* newData in mainDelegate.ScheduleList){
+					if([[newData objectForKey:@"CDate"] isEqualToString:[oldData objectForKey:@"CDate"]]){
+						NSMutableArray* newCompleteArray = [newData objectForKey:@"NL"];
+						NSArray* oldCompleteArray = [oldData objectForKey:@"NL"];
+						//compare
+						for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+							for(NSDictionary* oldCompleteDict in oldCompleteArray){
+								if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+									[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+									break;
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
+		[self.scheduleView reloadData];
+	}];
+	[request setFailedBlock:^{
+		[mainDelegate showNetworkFailed];
+	}];
+	[request startAsynchronous];
+	//2 fetch familarity data
+	NSDictionary *reqDict2 = [NSDictionary dictionaryWithObjectsAndKeys:
+							 mainDelegate.CurrUserID, @"userID",
+							 mainDelegate.CurrWordBookID, @"dictID",
+							 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"phaseIdx",
+							 nil];
+	
+	NSString* reqString2 = [NSString stringWithString:[reqDict2 JSONRepresentation]];
+	NSURL *url2 = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/FetchAllWordInfo"];
+    __block ASIHTTPRequest *request2 = [ASIHTTPRequest requestWithURL:url2];
+	[request2 addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+	[request2 addRequestHeader:@"Content-Type" value:@"application/json"];
+	[request2 appendPostData:[reqString2 dataUsingEncoding:NSUTF8StringEncoding]];
+	[request2 setCompletionBlock:^{
+		NSString *responseString = [request2 responseString];
+		NSDictionary* responseDict = [responseString JSONValue];
+		[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading:self.scheduleView];
+		//Filter & Write to a plist
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
+		NSString *phaseUserDataDir = [phaseDir stringByAppendingPathComponent:@"LangLibPhaseUserData.plist"];
+		NSString *uploadUserDataDir = [phaseDir stringByAppendingPathComponent:@"uploadUserData.plist"];
+		NSMutableArray* newUserData = (NSMutableArray*)[responseDict objectForKey:@"d"];
+		//Modify some keys
+		NSMutableArray* modifiedUserData = [[NSMutableArray alloc] init];
+		for(NSMutableDictionary* dict in newUserData){
+			NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
+			[tmpDict setObject:[dict objectForKey:@"F"] forKey:@"F"];
+			[tmpDict setObject:[dict objectForKey:@"L"] forKey:@"LID"];
+			[tmpDict setObject:[dict objectForKey:@"W"] forKey:@"WID"];
+			[modifiedUserData addObject:tmpDict];
+			[tmpDict release];
+		}
+		if([[NSFileManager defaultManager] fileExistsAtPath:uploadUserDataDir]){
+			NSArray* toUploadData = [[NSArray alloc] initWithContentsOfFile:uploadUserDataDir];
+			for(NSDictionary* upload in toUploadData){
+				for(NSMutableDictionary* toModify in modifiedUserData){
+					if([[toModify objectForKey:@"WID"] isEqualToString:[upload objectForKey:@"W"]]){
+						[toModify setValue:[upload objectForKey:@"F"] forKey:@"F"];
+					}
+				}
+			}
+		}
+		[modifiedUserData writeToFile:phaseUserDataDir atomically:YES];
+		[loadingIcon stopAnimating];
+	}];
+	[request2 setFailedBlock:^{
+		[loadingIcon stopAnimating];
+	}];
+	[request2 startAsynchronous];
+}
+
+- (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view{
+	
+	return NO; // should return if data source model is reloading
+	
+}
+- (NSDate*)egoRefreshTableHeaderDataSourceLastUpdated:(EGORefreshTableHeaderView*)view{
+	
+	return [NSDate date]; // should return date data source was last changed
+	
+}
+
+#pragma mark -
+#pragma mark UIScrollViewDelegate Methods
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+	
+	[_refreshHeaderView egoRefreshScrollViewDidScroll:scrollView];
+	
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+	
+	[_refreshHeaderView egoRefreshScrollViewDidEndDragging:scrollView];
+	
+}
+
 
 
 - (void)dealloc {    

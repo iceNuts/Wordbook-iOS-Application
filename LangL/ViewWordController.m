@@ -810,6 +810,19 @@
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     NSDictionary *currWord = [mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]];
     [currWord setValue: [NSNumber numberWithInteger: familiarity] forKey:@"F"];
+	
+	//get db directory
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *tmp = [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType];
+	NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
+	
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+		//1 insert this change into the uploadUserData.plist
+		//2 insert a directory path for getting this file into uploadQueue.plist
+		
+		return;
+	}
     NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                              mainDelegate.CurrWordBookID, @"wordBookID",
                              [NSString stringWithFormat:@"%d", familiarity], @"targetFamilarity",
