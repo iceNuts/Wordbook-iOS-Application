@@ -140,27 +140,8 @@
    
         [backButton release];
     }
-    /*
-    CGRect frame = CGRectMake(60, 0, 200, 44);
-    UILabel* label = [[[UILabel alloc] initWithFrame:frame] autorelease];
-    label.backgroundColor = [UIColor clearColor];
-    label.font = [UIFont boldSystemFontOfSize:20.0];
-    label.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
-    label.textAlignment = UITextAlignmentCenter;
-    label.textColor = [UIColor colorWithRed:110.0/255.0 green:170.0/255.0 blue:110.0/255.0 alpha:1];
-    //The two lines below are the only ones that have changed
-    label.text = viewController.title;
-    viewController.navigationItem.titleView = label;   
-     */
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-    /*
-     Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-     Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-     */
-}
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
@@ -168,29 +149,66 @@
      Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
      If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
      */
+	//set background upload
+	//get db directory
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *uploadQueueDir = [DoucumentsDirectiory stringByAppendingPathComponent:@"uploadQueue.plist"];
+	if([[NSFileManager defaultManager] fileExistsAtPath:uploadQueueDir]){
+		 bgTask = [application beginBackgroundTaskWithExpirationHandler:^{
+			//Stop uploading & do nothing
+			[uploadQueue cancelAllOperations];
+			[application endBackgroundTask:bgTask];
+		}];
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+			uploadQueue = [ASINetworkQueue queue];
+			[uploadQueue setDelegate:self];
+			[uploadQueue setQueueDidFinishSelector:@selector(uploadQueueFinished)];
+			NSArray* queue = [[NSArray alloc] initWithContentsOfFile:uploadQueueDir];
+			for(NSDictionary* dict in queue){
+				NSString* uploadWordListDir = [[[DoucumentsDirectiory stringByAppendingPathComponent:[dict objectForKey:@"dictID"]] stringByAppendingPathComponent:[dict objectForKey:@"phaseIdx"]] stringByAppendingPathComponent:@"uploadUserData.plist"];
+				if(![[NSFileManager defaultManager] fileExistsAtPath:uploadWordListDir]){
+					continue;
+				}
+				NSArray* userData = [[NSArray alloc] initWithContentsOfFile:uploadWordListDir];
+				NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+										 userData, @"wordList",
+										 [dict objectForKey:@"dictID"], @"dictID",
+										 [dict objectForKey:@"userID"], @"userID",
+										 [dict objectForKey:@"phaseIdx"], @"phaseIdx",
+										 nil];
+				NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/FeedBackWordInfo"];
+				NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+				__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+				[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+				[request addRequestHeader:@"Content-Type" value:@"application/json"];
+				[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+				[request setCompletionBlock:^{
+					[[NSFileManager defaultManager] removeItemAtPath:uploadWordListDir error:nil];
+				}];
+				[uploadQueue addOperation:request];
+			}
+			[uploadQueue go];
+		});
+	}
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    /*
-     Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-     */
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    /*
-     Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-     */
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    /*
-     Called when the application is about to terminate.
-     Save data if appropriate.
-     See also applicationDidEnterBackground:.
-     */
+-(void) uploadQueueFinished{
+	NSLog(@"Queue Finished");
+	//Remove item in array
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+	NSString *uploadQueueDir = [DoucumentsDirectiory stringByAppendingPathComponent:@"uploadQueue.plist"];
+	NSMutableArray* queue = [[NSMutableArray alloc] initWithContentsOfFile:uploadQueueDir];
+	NSMutableArray* new_queue = [[NSMutableArray alloc] init];
+	for(NSDictionary* dict in queue){
+		NSString* uploadWordListDir = [[[DoucumentsDirectiory stringByAppendingPathComponent:[dict objectForKey:@"dictID"]] stringByAppendingPathComponent:[dict objectForKey:@"phaseIdx"]] stringByAppendingPathComponent:@"uploadUserData.plist"];
+		if([[NSFileManager defaultManager] fileExistsAtPath:uploadWordListDir]){
+			[new_queue addObject:dict];
+		}
+	}
+	[new_queue writeToFile:uploadQueueDir atomically:YES];
+	[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 }
 
 - (void)dealloc

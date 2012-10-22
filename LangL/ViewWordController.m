@@ -557,8 +557,7 @@
         
     }];
     [request setFailedBlock:^{
-        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-//        [mainDelegate showNetworkFailed];
+
     }];
     [request startAsynchronous];
 }
@@ -665,8 +664,6 @@
         
     }];
     [request setFailedBlock:^{
-        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-//        [mainDelegate showNetworkFailed];
     }];
     [request startAsynchronous];
 
@@ -815,14 +812,78 @@
 	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 	NSString *tmp = [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType];
+	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
 	NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
+	NSString *uploadPlistDir = [phaseDir stringByAppendingPathComponent:@"uploadUserData.plist"];
+	NSString *uploadQueueDir = [DoucumentsDirectiory stringByAppendingPathComponent:@"uploadQueue.plist"];
 	
 	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
 		//1 insert this change into the uploadUserData.plist
 		//2 insert a directory path for getting this file into uploadQueue.plist
+		NSMutableArray* userData = [[NSMutableArray alloc] initWithContentsOfFile:uploadPlistDir];
+		if(nil == userData){
+			userData = [[NSMutableArray alloc] init];
+		}
+		BOOL flag = false;
 		
+		NSString* wordID;
+		//Request in db for WordID
+		sqlite3* database;
+		sqlite3_stmt *statement;
+		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK) {
+			NSLog(@"open sqlite db ok.");
+			NSString* tmp =[[[@"select Row_ID from WordMain where WordProto=" stringByAppendingString:@"'"] stringByAppendingString:wordProto.text] stringByAppendingString:@"'"];
+			const char *selectSql= [tmp UTF8String];
+			if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
+				NSLog(@"select ok.");
+			}
+			while (sqlite3_step(statement)==SQLITE_ROW) {
+				wordID = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
+			}
+		}
+		
+		for(NSMutableDictionary* data in userData){
+			if([[data objectForKey:@"W"] isEqualToString:wordID]){
+				flag = true;
+				[data setValue:[NSString stringWithFormat:@"%d", familiarity] forKey:@"F"];
+				[data setValue:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx] forKey:@"L"];
+				break;
+			}
+		}
+		if(false == flag){
+			NSMutableDictionary* data = [[NSMutableDictionary alloc] init];
+			[data setObject:[NSString stringWithFormat:@"%d", familiarity] forKey:@"F"];
+			[data setObject:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx] forKey:@"L"];
+			[data setObject:wordID forKey:@"W"];
+			[userData addObject:data];
+			[data release];
+		}
+		[userData writeToFile:uploadPlistDir atomically:YES];
+		//Insert a record into Queue
+		NSMutableArray* uploadQueue = [[NSMutableArray alloc] initWithContentsOfFile:uploadQueueDir];
+		if(nil == uploadQueue){
+			uploadQueue = [[NSMutableArray alloc] init];
+		}
+		flag = false;
+		for(NSDictionary* queueData in uploadQueue){
+			if([[queueData objectForKey:@"dictID"] isEqualToString:mainDelegate.CurrWordBookID]){
+				flag = true;
+				break;
+			}
+		}
+		if(false == flag){
+			NSMutableDictionary* uploadEntry = [[NSMutableDictionary alloc] init];
+			[uploadEntry setObject:mainDelegate.CurrWordBookID forKey:@"dictID"];
+			[uploadEntry setObject:mainDelegate.CurrUserID forKey:@"userID"];
+			[uploadEntry setObject:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx] forKey:@"phaseIdx"];
+			[uploadQueue addObject:uploadEntry];
+			[uploadEntry release];
+			[uploadQueue writeToFile:uploadQueueDir atomically:YES];
+		}
 		return;
 	}
+	
     NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                              mainDelegate.CurrWordBookID, @"wordBookID",
                              [NSString stringWithFormat:@"%d", familiarity], @"targetFamilarity",

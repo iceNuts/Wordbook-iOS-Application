@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "CreateWordBookParams.h"
+#import "ASIHTTPRequest.h"
+#import "ASINetworkQueue.h"
+#import "SBJson.h"
 
 @class LoginController;
 
@@ -35,6 +38,8 @@
     bool AutoVoice;
     bool AutoNextWord;
     bool AutoFamiliarity;
+	ASINetworkQueue *uploadQueue;
+	UIBackgroundTaskIdentifier bgTask;
 }
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 
@@ -68,4 +73,5 @@
 -(void)showDownloadSuccess;
 -(void)showDownloadInfo;
 -(void)userLogout;
+-(void)uploadQueueFinished;
 @end
