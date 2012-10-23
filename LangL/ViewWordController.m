@@ -735,6 +735,43 @@
             }
         }     
         mainDelegate.NeedReloadSchedule = YES;
+		//if off-line then set local plist complete and prepare to upload on background
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *tmp = [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
+		NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
+		NSString *wordBookDataDir = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+		if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+			NSArray *wordBookList = [[NSArray alloc] initWithContentsOfFile:wordBookDataDir];
+			for(NSDictionary *dict in wordBookList){
+				if([[dict objectForKey:@"Idx"] intValue]== mainDelegate.CurrItemIdx){
+					NSArray* NL = [dict objectForKey:@"NL"];
+					NSArray* OL = [dict objectForKey:@"OL"];
+					BOOL flag = false;
+					for(NSMutableDictionary* myDict in NL){
+						if([[myDict objectForKey:@"LID"] intValue] == mainDelegate.CurrListID){
+							flag = true;
+							[myDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+							break;
+						}
+					}
+					if(flag) break;
+					for(NSMutableDictionary* myDict in OL){
+						if([[myDict objectForKey:@"LID"] intValue] == mainDelegate.CurrListID){
+							[myDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+							break;
+						}
+					}
+					break;
+				}
+			}
+			[wordBookList writeToFile:wordBookDataDir atomically:YES];
+			[self DisplayCurrWord];
+			return;
+		}
+		
         NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                  [NSString stringWithFormat:@"%d", mainDelegate.CurrItemIdx], @"scheduleItemIndex",
                                  [NSString stringWithFormat:@"%d", mainDelegate.CurrListID], @"listID",
@@ -813,6 +850,7 @@
 	NSString *dbDir = [[DoucumentsDirectiory stringByAppendingPathComponent:tmp]  stringByAppendingString:@".db"];
 	NSString *uploadPlistDir = [phaseDir stringByAppendingPathComponent:@"uploadUserData.plist"];
 	NSString *uploadQueueDir = [DoucumentsDirectiory stringByAppendingPathComponent:@"uploadQueue.plist"];
+	NSString *phaseUserDataDir = [phaseDir stringByAppendingPathComponent:@"LangLibPhaseUserData.plist"];
 	
 	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
 		//1 insert this change into the uploadUserData.plist
@@ -836,7 +874,6 @@
 				wordID = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
 			}
 		}
-		
 		for(NSMutableDictionary* data in userData){
 			if([[data objectForKey:@"W"] isEqualToString:wordID]){
 				flag = true;
@@ -875,6 +912,15 @@
 			[uploadEntry release];
 			[uploadQueue writeToFile:uploadQueueDir atomically:YES];
 		}
+		//Set local familarity & status
+		NSArray* userPhaseData = [[NSArray alloc] initWithContentsOfFile:phaseUserDataDir];
+		for(NSMutableDictionary* dict in userPhaseData){
+			if([[dict objectForKey:@"WID"] isEqualToString:wordID]){
+				[dict setValue:[NSNumber numberWithInteger:familiarity] forKey:@"F"];
+				break;
+			}
+		}
+		[userPhaseData writeToFile:phaseUserDataDir atomically:YES];
 		return;
 	}
 	

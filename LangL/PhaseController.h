@@ -31,7 +31,6 @@
 }
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingIcon;
 - (IBAction)showDownloadActionSheet:(id)sender;
-- (void)bounceOutAnimationStopped;
 - (void)downloadData;
 - (void)stopDownloadData;
 - (void)downloadQueueFinished;

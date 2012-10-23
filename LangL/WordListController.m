@@ -57,8 +57,9 @@
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
 	NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
 	NSString *phaseUserDataDir = [phaseDir stringByAppendingPathComponent:@"LangLibPhaseUserData.plist"];
-	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
-	
+	NSString *tmp = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+	NSString *dbDir = [tmp stringByAppendingString:@".db"];
+
 	sqlite3* database;
 	sqlite3_stmt *statement;
 	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && [[NSFileManager defaultManager] fileExistsAtPath:phaseUserDataDir] && sqlite3_open([dbDir UTF8String], &database) == SQLITE_OK){
@@ -68,7 +69,7 @@
 		//fetch user data
 		NSMutableArray* usedUserData = [[NSMutableArray alloc] init];
 		for(NSMutableDictionary* data in phaseUserData){
-			if([[data objectForKey:@"LID"] isEqualToString:[NSString stringWithFormat:@"%d", mainDelegate.CurrListID]]){
+			if([[data objectForKey:@"LID"] intValue] == mainDelegate.CurrListID){
 				
 				//combine word data
 				NSString *_WID = [[@"'" stringByAppendingString:[data objectForKey:@"WID"]] stringByAppendingString:@"'"];
@@ -92,12 +93,11 @@
 				
 				[usedUserData addObject:data];
 			}
-			sqlite3_finalize(statement);
 		}
 		mainDelegate.WordList = [usedUserData copy];
+		sqlite3_finalize(statement);
 		sqlite3_close(database);
 	}
-
 	if(0 == [mainDelegate.WordList count] || !mainDelegate.WordList){
 		//0: init   1: asc  2: desc   3;fam asc  4 fam desc  5: random
 		mainDelegate.CurrSortType = 0;
@@ -126,16 +126,6 @@
 			NSString *responseString = [request responseString];
 			NSDictionary* responseDict = [responseString JSONValue];
 			mainDelegate.WordList = (NSMutableArray *) [responseDict objectForKey:@"d"];
-			
-//			//Write the data to a list
-//			NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//			NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
-//			NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
-//			NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx]];
-//			[[NSFileManager defaultManager] createDirectoryAtPath:phaseDir withIntermediateDirectories:YES attributes:nil error:nil];
-//			NSString *wordlistDir = [[phaseDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrListID]] stringByAppendingString:@".plist"];
-//			[mainDelegate.WordList writeToFile:wordlistDir atomically:YES];
-			
 			mainDelegate.CurrWordIdx = 0;
 			int totalWords = mainDelegate.WordList.count;
 			[mainDelegate.filteredArr removeAllObjects];
@@ -161,6 +151,7 @@
 		}];
 		[request startAsynchronous];
 	}else{
+		NSLog(@"iceNuts: You are off-line boy :)");
 		[loadingIcon stopAnimating];
 		mainDelegate.CurrWordIdx = 0;
 		int totalWords = mainDelegate.WordList.count;

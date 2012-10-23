@@ -190,6 +190,53 @@
 						for(NSDictionary* oldCompleteDict in oldCompleteArray){
 							if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
 								[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+								//Upload the result
+								NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+														  [newData objectForKey:@"Idx"], @"scheduleItemIndex",
+														 [newCompleteDict objectForKey:@"LID"], @"listID",
+														 [NSString stringWithFormat:@"%@", @"true"], @"selected",
+														 mainDelegate.CurrWordBookID, @"wordBookID",
+														 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"subWbIdx",
+														 mainDelegate.CurrUserID, @"userID",
+														 nil];
+								//RPC JSON
+								NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+								
+								NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/MarkListStudyCompleted"];
+								__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+								[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+								[request addRequestHeader:@"Content-Type" value:@"application/json"];
+								[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+								[request startAsynchronous];
+								break;
+							}
+						}
+					}
+					//Switch to OL
+					newCompleteArray = [newData objectForKey:@"OL"];
+					oldCompleteArray = [oldData objectForKey:@"OL"];
+					for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+						for(NSDictionary* oldCompleteDict in oldCompleteArray){
+							if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+								[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+								//Upload the result
+								NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+														 [newData objectForKey:@"Idx"], @"scheduleItemIndex",
+														 [newCompleteDict objectForKey:@"LID"], @"listID",
+														 [NSString stringWithFormat:@"%@", @"true"], @"selected",
+														 mainDelegate.CurrWordBookID, @"wordBookID",
+														 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"subWbIdx",
+														 mainDelegate.CurrUserID, @"userID",
+														 nil];
+								//RPC JSON
+								NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+								
+								NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/MarkListStudyCompleted"];
+								__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+								[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+								[request addRequestHeader:@"Content-Type" value:@"application/json"];
+								[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+								[request startAsynchronous];
 								break;
 							}
 						}
@@ -528,6 +575,53 @@
 							for(NSDictionary* oldCompleteDict in oldCompleteArray){
 								if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
 									[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+									//Upload the result
+									NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+															 [newData objectForKey:@"Idx"], @"scheduleItemIndex",
+															 [newCompleteDict objectForKey:@"LID"], @"listID",
+															 [NSString stringWithFormat:@"%@", @"true"], @"selected",
+															 mainDelegate.CurrWordBookID, @"wordBookID",
+															 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"subWbIdx",
+															 mainDelegate.CurrUserID, @"userID",
+															 nil];
+									//RPC JSON
+									NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+									
+									NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/MarkListStudyCompleted"];
+									__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+									[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+									[request addRequestHeader:@"Content-Type" value:@"application/json"];
+									[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+									[request startAsynchronous];
+									break;
+								}
+							}
+						}
+						//Switch to OL
+						newCompleteArray = [newData objectForKey:@"OL"];
+						oldCompleteArray = [oldData objectForKey:@"OL"];
+						for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+							for(NSDictionary* oldCompleteDict in oldCompleteArray){
+								if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+									[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+									//Upload the result
+									NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+															 [newData objectForKey:@"Idx"], @"scheduleItemIndex",
+															 [newCompleteDict objectForKey:@"LID"], @"listID",
+															 [NSString stringWithFormat:@"%@", @"true"], @"selected",
+															 mainDelegate.CurrWordBookID, @"wordBookID",
+															 [NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx], @"subWbIdx",
+															 mainDelegate.CurrUserID, @"userID",
+															 nil];
+									//RPC JSON
+									NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+									
+									NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/MarkListStudyCompleted"];
+									__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+									[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+									[request addRequestHeader:@"Content-Type" value:@"application/json"];
+									[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+									[request startAsynchronous];
 									break;
 								}
 							}
