@@ -878,14 +878,12 @@
 			if([[data objectForKey:@"W"] isEqualToString:wordID]){
 				flag = true;
 				[data setValue:[NSString stringWithFormat:@"%d", familiarity] forKey:@"F"];
-				[data setValue:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx] forKey:@"L"];
 				break;
 			}
 		}
 		if(false == flag){
 			NSMutableDictionary* data = [[NSMutableDictionary alloc] init];
 			[data setObject:[NSString stringWithFormat:@"%d", familiarity] forKey:@"F"];
-			[data setObject:[NSString stringWithFormat:@"%d", mainDelegate.CurrPhaseIdx] forKey:@"L"];
 			[data setObject:wordID forKey:@"W"];
 			[userData addObject:data];
 			[data release];

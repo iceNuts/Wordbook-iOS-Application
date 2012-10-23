@@ -186,7 +186,6 @@
 				[request setCompletionBlock:^{
 					[[NSFileManager defaultManager] removeItemAtPath:uploadWordListDir error:nil];
 				}];
-				NSLog(@"%@", request);
 				[uploadQueue addOperation:request];
 			}
 			[uploadQueue go];
