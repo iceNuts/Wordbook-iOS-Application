@@ -244,7 +244,6 @@
     [btnShowExpSen setBackgroundImage:nil forState:UIControlStateNormal];
     [btnShowEngExp setBackgroundImage:nil forState:UIControlStateNormal];
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-   // NSLog([mainDelegate.CurrWordIdx stringValue]);
     NSDictionary *currWord = [mainDelegate.WordList objectAtIndex: [[mainDelegate.filteredArr objectAtIndex: mainDelegate.CurrWordIdx] integerValue]];
     wordProto.text = [currWord objectForKey:@"W"];
     wordMeaning.text = [currWord objectForKey:@"CN"];
@@ -473,7 +472,6 @@
 		sqlite3_stmt *statement;
 		NSMutableArray* exampleSens = [[NSMutableArray alloc] init];
 		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK){
-			NSLog(@"open sqlite db ok.");
 			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
 			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
 			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
@@ -584,7 +582,6 @@
 		sqlite3_stmt *statement;
 		NSMutableArray* exampleSens = [[NSMutableArray alloc] init];
 		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK){
-			NSLog(@"open sqlite db ok.");
 			NSString *word = [[@"'" stringByAppendingString:[currWord objectForKey:@"W"]] stringByAppendingString:@"'"];
 			const char *selectSql= [[@"select Row_ID from WordMain where WordProto = " stringByAppendingString:word] cStringUsingEncoding:NSUTF8StringEncoding];
 			int result = sqlite3_prepare_v2(database, selectSql, -1, &statement, nil);
@@ -596,7 +593,6 @@
 				const char *selectQ= [[@"select SentenceEN,SentenceCN from ExampleSentence where MainID=" stringByAppendingString: WordID] cStringUsingEncoding:NSUTF8StringEncoding];
 				sqlite3_stmt *statement;
 				if (sqlite3_prepare_v2(database, selectQ, -1, &statement, nil)==SQLITE_OK) {
-					NSLog(@"Time to create NSArray");
 					while (sqlite3_step(statement) == SQLITE_ROW) {
 						NSString *ESentence=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];
 						NSString *CSentence = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 1) encoding:NSUTF8StringEncoding];
@@ -832,11 +828,9 @@
 		sqlite3* database;
 		sqlite3_stmt *statement;
 		if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK) {
-			NSLog(@"open sqlite db ok.");
 			NSString* tmp =[[[@"select Row_ID from WordMain where WordProto=" stringByAppendingString:@"'"] stringByAppendingString:wordProto.text] stringByAppendingString:@"'"];
 			const char *selectSql= [tmp UTF8String];
 			if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
-				NSLog(@"select ok.");
 			}
 			while (sqlite3_step(statement)==SQLITE_ROW) {
 				wordID = [[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];

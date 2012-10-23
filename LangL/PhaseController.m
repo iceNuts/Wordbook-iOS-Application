@@ -443,10 +443,8 @@
 	sqlite3* database;
 	sqlite3_stmt *statement;
 	if (sqlite3_open([dbDir UTF8String], &database)==SQLITE_OK) {
-		NSLog(@"open sqlite db ok.");
 		const char *selectSql="select WordProto from WordMain";
 		if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
-			NSLog(@"select ok.");
 		}
 		while (sqlite3_step(statement)==SQLITE_ROW) {
 			NSString *WordProto=[[NSString alloc] initWithCString:(char *)sqlite3_column_text(statement, 0) encoding:NSUTF8StringEncoding];

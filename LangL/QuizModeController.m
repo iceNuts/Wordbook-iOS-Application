@@ -126,7 +126,6 @@
 					NSString *tmp = [[@"'" stringByAppendingString:wordID] stringByAppendingString:@"'"];
 					const char *selectSql= [[@"select * from QuizMode where WordID=" stringByAppendingString:tmp] cStringUsingEncoding:NSUTF8StringEncoding];
 					if (sqlite3_prepare_v2(database, selectSql, -1, &statement, nil)==SQLITE_OK) {
-						NSLog(@"select ok.");
 					}
 					while (sqlite3_step(statement)==SQLITE_ROW){
 						//set dict & add it to array
