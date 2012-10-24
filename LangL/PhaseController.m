@@ -350,6 +350,88 @@
 
 - (void)downloadData{
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+	//download user data
+	for(int i = 0; i < mainDelegate.PhaseCount; i++){
+		//write phase data to plist
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",i]];
+		
+		if([[NSFileManager defaultManager] fileExistsAtPath:phaseDir]){
+			continue;
+		}
+		
+		NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+								 mainDelegate.CurrUserID, @"userID",
+								 mainDelegate.CurrWordBookID, @"wordBookID",
+								 [NSString stringWithFormat:@"%d", i], @"phaseIdx",
+								 nil];
+		
+		NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+		NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/ListSchedule"];
+		__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+		[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+		[request addRequestHeader:@"Content-Type" value:@"application/json"];
+		[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+		[request setDelegate:self];
+		[request setCompletionBlock:^{
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			// Use when fetching text data
+			NSString *responseString = [request responseString];
+			NSDictionary* responseDict = [responseString JSONValue];
+			
+			
+			mainDelegate.ScheduleList = (NSMutableArray *) [responseDict objectForKey:@"d"];
+			
+			//create phaseDir
+			NSError *error;
+			if (![[NSFileManager defaultManager] fileExistsAtPath:phaseDir]){
+				[[NSFileManager defaultManager] createDirectoryAtPath: phaseDir withIntermediateDirectories:YES attributes:nil error:&error];
+			}
+			
+			NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+			//Compare then set the value
+			NSMutableArray* oldScheduleList;
+			if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+				//load file and update the value for ScheduleList
+				oldScheduleList = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+				for(NSDictionary* oldData in oldScheduleList){
+					for(NSMutableDictionary* newData in mainDelegate.ScheduleList){
+						if([[newData objectForKey:@"CDate"] isEqualToString:[oldData objectForKey:@"CDate"]]){
+							NSMutableArray* newCompleteArray = [newData objectForKey:@"NL"];
+							NSArray* oldCompleteArray = [oldData objectForKey:@"NL"];
+							//compare
+							for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+								for(NSDictionary* oldCompleteDict in oldCompleteArray){
+									if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+										[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+										break;
+									}
+								}
+							}
+							//Switch to OL
+							newCompleteArray = [newData objectForKey:@"OL"];
+							oldCompleteArray = [oldData objectForKey:@"OL"];
+							for(NSMutableDictionary* newCompleteDict in newCompleteArray){
+								for(NSDictionary* oldCompleteDict in oldCompleteArray){
+									if(([oldCompleteDict objectForKey:@"LID"] == [newCompleteDict objectForKey:@"LID"]) && ([[oldCompleteDict objectForKey:@"C"] boolValue] != [[newCompleteDict objectForKey:@"C"] boolValue])){
+										[newCompleteDict setValue:[NSNumber numberWithBool:YES] forKey:@"C"];
+										break;
+									}
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+			[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
+			[mainDelegate.ScheduleList release];
+		}];
+		[request startAsynchronous];
+	}
+
 	//if isDownloading, disable other UI interaction;
 	if(isDataWithMusic){
 		//Music + Words
