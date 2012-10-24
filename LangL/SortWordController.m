@@ -215,8 +215,9 @@
                                                          ascending:YES];
             NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
             [sortDescriptor release];
+			mainDelegate.WordList = [mainDelegate.WordList mutableCopy];
             [mainDelegate.WordList sortUsingDescriptors:sortDescriptors];
-                     break;                
+			break;                
         }
         case 2:
         {
@@ -225,6 +226,7 @@
                                                          ascending:YES];
             NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
             [sortDescriptor release];
+			mainDelegate.WordList = [mainDelegate.WordList mutableCopy];
             [mainDelegate.WordList sortUsingDescriptors:sortDescriptors];
             break;                
         }
@@ -235,6 +237,7 @@
                                                          ascending:NO];
             NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
             [sortDescriptor release];
+			mainDelegate.WordList = [mainDelegate.WordList mutableCopy];
             [mainDelegate.WordList sortUsingDescriptors:sortDescriptors];
             break;                
         }        
