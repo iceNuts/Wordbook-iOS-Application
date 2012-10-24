@@ -73,7 +73,8 @@
     [super viewDidLoad];
     UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_main_green.png"]];
     self.view.backgroundColor = background;
-    [background release];
+	if(background)
+		[background release];
     
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
@@ -82,7 +83,8 @@
     [formatter setDateFormat : @"yyyy-MM-dd"];
     currDateStr = [formatter stringFromDate:[NSDate dateWithTimeIntervalSinceNow: 0.0]];
     [currDateStr retain];
-    [formatter release];  
+	if(formatter)
+		[formatter release];
     
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
 	
@@ -423,7 +425,8 @@
             UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ico_datebook_finish.png"]];
             [iconImage setFrame: CGRectMake(10, 8, 40, 46)];
             [cell.contentView addSubview: iconImage];
-            [iconImage release];
+			if(iconImage)
+				[iconImage release];
  
             UILabel *hint2 = [[UILabel alloc] initWithFrame:CGRectMake(60, 30, 150, 20)];
             hint2.textColor = [UIColor greenColor];
@@ -431,7 +434,8 @@
             hint2.font = [UIFont systemFontOfSize:13];
             hint2.backgroundColor = [UIColor clearColor];
             [cell.contentView addSubview: hint2];
-            [hint2 release];
+			if(hint2)
+				[hint2 release];
         }        
         else 
         {
@@ -440,14 +444,16 @@
                 UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ico_datebook_open.png"]];
                 [iconImage setFrame: CGRectMake(10, 8, 40, 46)];
                 [cell.contentView addSubview: iconImage];
-                [iconImage release];                 
+				if(iconImage)
+					[iconImage release];
             }
             else
             {
                 UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ico_datebook.png"]];
                 [iconImage setFrame: CGRectMake(10, 8, 40, 46)];
                 [cell.contentView addSubview: iconImage];
-                [iconImage release];  
+				if(iconImage)
+					[iconImage release];  
             }
             
             UILabel *hint2 = [[UILabel alloc] initWithFrame:CGRectMake(60, 30, 150, 20)];
@@ -456,7 +462,8 @@
             hint2.font = [UIFont systemFontOfSize:13];
             hint2.backgroundColor = [UIColor clearColor];
             [cell.contentView addSubview: hint2];
-            [hint2 release];            
+			if(hint2)
+				[hint2 release];
         }        
         if ([currDateStr compare:[dict valueForKey:@"CDate"]] == NSOrderedSame)
         {

@@ -442,8 +442,6 @@
 				}
 			}
 			[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
-			if(mainDelegate.ScheduleList)
-				[mainDelegate.ScheduleList release];
 		}];
 		[request startAsynchronous];
 		
