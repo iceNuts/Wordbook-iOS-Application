@@ -7,7 +7,6 @@
 //
 
 #import "LangLAppDelegate.h"
-#import "LoginController.h"
 #import "WBListController.h"
 
 
@@ -209,6 +208,7 @@
 	}
 	[new_queue writeToFile:uploadQueueDir atomically:YES];
 	[[UIApplication sharedApplication] endBackgroundTask:bgTask];
+	[new_queue release];
 }
 
 - (void)dealloc

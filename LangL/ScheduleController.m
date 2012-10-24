@@ -685,6 +685,7 @@
 		}
 		[modifiedUserData writeToFile:phaseUserDataDir atomically:YES];
 		[loadingIcon stopAnimating];
+		[modifiedUserData release];
 	}];
 	[request2 setFailedBlock:^{
 		[loadingIcon stopAnimating];

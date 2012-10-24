@@ -10,7 +10,6 @@
 #import "LangLAppDelegate.h"
 #import "EGORefreshTableHeaderView.h"
 #import "ScheduleController.h"
-#import "Three20/Three20.h"
 #import "ASIHTTPRequest.h"
 #import "ASINetworkQueue.h"
 #import "sqlite3.h"

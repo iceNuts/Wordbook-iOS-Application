@@ -11,6 +11,8 @@
 #import "ASIHTTPRequest.h"
 #import "ASINetworkQueue.h"
 #import "SBJson.h"
+#import "LoginController.h"
+
 
 @class LoginController;
 
