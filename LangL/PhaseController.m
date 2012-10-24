@@ -50,20 +50,23 @@
 		}
 		[old_dict setObject:@"0" forKey:[NSString stringWithFormat:@"%d",mainDelegate.CurrDictType]];
 		[old_dict writeToFile:filePath atomically:YES];
-		[old_dict release];
+		if(old_dict)
+			[old_dict release];
 		mp3done = NO;
 	}else if([[dict objectForKey: [NSString stringWithFormat:@"%d",mainDelegate.CurrDictType]] isEqualToString:@"0"]){
 		mp3done = NO;
 	}else{
 		mp3done = YES;
 	}
-	[dict release];
+	if(dict)
+		[dict release];
 	//Draw custom tableview
 	mainDelegate.PhaseCount = mainDelegate.CurrPhaseIdx + 1;
 	
     UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_main_green.png"]];
     self.view.backgroundColor = background;
-    [background release];
+	if(background)
+		[background release];
     myTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 410)];
     myTableView.delegate = self;
     myTableView.dataSource = self;
@@ -86,7 +89,8 @@
 
 - (void)dealloc {
 	[super dealloc];
-    [myTableView release];
+	if(myTableView)
+		[myTableView release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -122,7 +126,7 @@
 	downloadCell = nil;
     static NSString *CellIdentifier = @"Cell";
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
-    UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
 	
 	//If not downloaded & bought, show this at the end of page
 	BOOL hasPaid = false;
@@ -197,14 +201,16 @@
 		UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed: bookIcon]];
 		[iconImage setFrame: CGRectMake(10, 10, 80, 80)];
 		[cell.contentView addSubview: iconImage];
-		[iconImage release];
+		if(iconImage)
+			[iconImage release];
 		
 		UILabel *hint1 = [[UILabel alloc] initWithFrame:CGRectMake(110, 45, 240, 30)];
 		hint1.textColor = [UIColor lightTextColor];
 		hint1.font = [UIFont systemFontOfSize:13];
 		hint1.backgroundColor = [UIColor clearColor];
 		[cell.contentView addSubview: hint1];
-		[hint1 release];
+		if(hint1)
+			[hint1 release];
 		
 		if(!hasPaid){
 			cell.userInteractionEnabled = NO;
@@ -227,20 +233,23 @@
     UIImageView *splitter = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"line_item.png"]];
     [splitter setFrame: CGRectMake(0, 102, 320, 2)];
     [cell.contentView addSubview: splitter];
-    [splitter release];
-    cell.selectedBackgroundView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bg_item.png"]] autorelease];
+	if(splitter)
+		[splitter release];
+    cell.selectedBackgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bg_item.png"]];
 	
     UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ico_book_addnew_n.png"]];
 	[iconImage setFrame: CGRectMake(10, 10, 80, 80)];
 	[cell.contentView addSubview: iconImage];
-	[iconImage release];
+	if(iconImage)
+		[iconImage release];
 	UILabel *hint1 = [[UILabel alloc] initWithFrame:CGRectMake(110, 20, 150, 30)];
 	hint1.textColor = [UIColor whiteColor];
 	hint1.text = [@"阶段" stringByAppendingString: [NSString stringWithFormat:@"%d", (indexPath.row+1)]];
 	hint1.font = [UIFont systemFontOfSize:14];
 	hint1.backgroundColor = [UIColor clearColor];
 	[cell.contentView addSubview: hint1];
-	[hint1 release];
+	if(hint1)
+		[hint1 release];
 	UILabel *hint2 = [[UILabel alloc] initWithFrame:CGRectMake(110, 40, 150, 30)];
 	hint2.textColor = [UIColor lightTextColor];
 	if((mainDelegate.PhaseCount - 1) == indexPath.row)
@@ -250,7 +259,8 @@
 	hint2.font = [UIFont systemFontOfSize:13];
 	hint2.backgroundColor = [UIColor clearColor];
 	[cell.contentView addSubview: hint2];
-	[hint2 release];
+	if(hint2)
+		[hint2 release];
 	
 	return cell;
 
@@ -278,12 +288,13 @@
 	//Get into Schedule view
     mainDelegate.NeedReloadSchedule = NO;
     mainDelegate.CurrPhaseIdx = indexPath.row;	
-	
+		
 	//ScheduleController should load phase data according to CurrPhaseIdx
 	ScheduleController *detailViewController = [[ScheduleController alloc] initWithNibName:@"ScheduleController" bundle:nil];
 	
 	[self.navigationController pushViewController:detailViewController animated:YES];
-	[detailViewController release];
+	if(detailViewController)
+		[detailViewController release];
 }
 
 - (IBAction)showDownloadActionSheet:(id)sender{
@@ -300,11 +311,11 @@
 	}
 	downloadInfoSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
 	[downloadInfoSheet showInView:self.view];
-	[downloadInfoSheet release];
+	if(downloadInfoSheet)
+		[downloadInfoSheet release];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-	
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
@@ -334,7 +345,8 @@
     if([indexPath row] == mainDelegate.PhaseCount){
 		if(isDownloading){
 			if(downloadCell){
-				[downloadProgress release];
+				if(downloadProgress)
+					[downloadProgress release];
 				downloadProgress = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
 				downloadProgress.progress = 0.0;
 				downloadProgress.frame = CGRectMake(110, 30, 150, 30);
@@ -357,8 +369,12 @@
 		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
 		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
 		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",i]];
+		NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
+		//Filter & Write to a plist
+		NSString *phaseUserDataDir = [phaseDir stringByAppendingPathComponent:@"LangLibPhaseUserData.plist"];
+		NSString *uploadUserDataDir = [phaseDir stringByAppendingPathComponent:@"uploadUserData.plist"];
 		
-		if([[NSFileManager defaultManager] fileExistsAtPath:phaseDir]){
+		if([[NSFileManager defaultManager] fileExistsAtPath:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:phaseUserDataDir]){
 			continue;
 		}
 		
@@ -390,7 +406,6 @@
 				[[NSFileManager defaultManager] createDirectoryAtPath: phaseDir withIntermediateDirectories:YES attributes:nil error:&error];
 			}
 			
-			NSString *filePath = [phaseDir stringByAppendingPathComponent:@"LangLibWordBookPhaseInfo.plist"];
 			//Compare then set the value
 			NSMutableArray* oldScheduleList;
 			if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
@@ -427,11 +442,59 @@
 				}
 			}
 			[mainDelegate.ScheduleList writeToFile:filePath atomically: YES];
-			[mainDelegate.ScheduleList release];
+			if(mainDelegate.ScheduleList)
+				[mainDelegate.ScheduleList release];
 		}];
 		[request startAsynchronous];
+		
+		//2 fetch familarity data
+		NSDictionary *reqDict2 = [NSDictionary dictionaryWithObjectsAndKeys:
+								  mainDelegate.CurrUserID, @"userID",
+								  mainDelegate.CurrWordBookID, @"dictID",
+								  [NSString stringWithFormat:@"%d", i], @"phaseIdx",
+								  nil];
+		
+		NSString* reqString2 = [NSString stringWithString:[reqDict2 JSONRepresentation]];
+		NSURL *url2 = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/FetchAllWordInfo"];
+		__block ASIHTTPRequest *request2 = [ASIHTTPRequest requestWithURL:url2];
+		[request2 addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+		[request2 addRequestHeader:@"Content-Type" value:@"application/json"];
+		[request2 appendPostData:[reqString2 dataUsingEncoding:NSUTF8StringEncoding]];
+		[request2 setCompletionBlock:^{
+			NSString *responseString = [request2 responseString];
+			NSDictionary* responseDict = [responseString JSONValue];
+			NSMutableArray* newUserData = (NSMutableArray*)[responseDict objectForKey:@"d"];
+			//Modify some keys
+			NSMutableArray* modifiedUserData = [[NSMutableArray alloc] init];
+			for(NSMutableDictionary* dict in newUserData){
+				NSMutableDictionary* tmpDict = [[NSMutableDictionary alloc] init];
+				[tmpDict setObject:[dict objectForKey:@"F"] forKey:@"F"];
+				[tmpDict setObject:[dict objectForKey:@"L"] forKey:@"LID"];
+				[tmpDict setObject:[dict objectForKey:@"W"] forKey:@"WID"];
+				[modifiedUserData addObject:tmpDict];
+				if(tmpDict)
+					[tmpDict release];
+			}
+			if([[NSFileManager defaultManager] fileExistsAtPath:uploadUserDataDir]){
+				NSArray* toUploadData = [[NSArray alloc] initWithContentsOfFile:uploadUserDataDir];
+				for(NSDictionary* upload in toUploadData){
+					for(NSMutableDictionary* toModify in modifiedUserData){
+						if([[toModify objectForKey:@"WID"] isEqualToString:[upload objectForKey:@"W"]]){
+							[toModify setValue:[upload objectForKey:@"F"] forKey:@"F"];
+						}
+					}
+				}
+			}
+			[modifiedUserData writeToFile:phaseUserDataDir atomically:YES];
+			if(modifiedUserData)
+				[modifiedUserData release];
+		}];
+		[request2 setFailedBlock:^{
+			[loadingIcon stopAnimating];
+		}];
+		[request2 startAsynchronous];
 	}
-
+	
 	//if isDownloading, disable other UI interaction;
 	if(isDataWithMusic){
 		//Music + Words
@@ -457,13 +520,15 @@
 			[zipArchive UnzipOpenFile:dbZipDir];
 			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
 			[zipArchive UnzipCloseFile];
-			[zipArchive release];
+			if(zipArchive)
+				[zipArchive release];
 			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
 			[self performSelectorOnMainThread:@selector(fetchMp3Data) withObject:nil waitUntilDone:1.0f];
 		}];
 		[downloadRequest setFailedBlock:^{
 			isDownloading = NO;
 			[mainDelegate showNetworkFailed];
+			[downloadRequest clearDelegatesAndCancel];
 			[myTableView reloadData];
 		}];
 		[request startAsynchronous];
@@ -495,13 +560,15 @@
 			[zipArchive UnzipOpenFile:dbZipDir];
 			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
 			[zipArchive UnzipCloseFile];
-			[zipArchive release];
+			if(zipArchive)
+				[zipArchive release];
 			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
 			[myTableView reloadData];
 		}];
 		[downloadRequest setFailedBlock:^{
 			isDownloading = NO;
 			[mainDelegate showNetworkFailed];
+			[downloadRequest clearDelegatesAndCancel];
 			[myTableView reloadData];
 		}];
 		[downloadRequest startAsynchronous];
@@ -575,7 +642,8 @@
 		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
 		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"0", nil] forKeys: [[NSArray alloc] initWithObjects:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], nil]];
 		[dict writeToFile:filePath atomically:YES];
-		[dict release];
+		if(dict)
+			[dict release];
 		if(downloadCanceled){
 			downloadCanceled = NO;
 			[mainDelegate showNetworkFailed];
@@ -594,7 +662,8 @@
 		NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
 		NSDictionary* dict = [[NSDictionary alloc] initWithObjects:[[NSArray alloc] initWithObjects:@"1", nil] forKeys: [[NSArray alloc] initWithObjects:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], nil]];
 		[dict writeToFile:filePath atomically:YES];
-		[dict release];
+		if(dict)
+			[dict release];
 		[myTableView reloadData];
 	}
 }

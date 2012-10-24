@@ -374,13 +374,13 @@
 {
     static NSString *CellIdentifier = @"Cell";
     
-    UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
+    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
     UIImageView *splitter = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"line_item.png"]];
     [splitter setFrame: CGRectMake(0, 64, 310, 2)];
     [cell.contentView addSubview: splitter];
     [splitter release];
         
-    cell.selectedBackgroundView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bg_item.png"]] autorelease];
+    cell.selectedBackgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bg_item.png"]];
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
     NSDictionary *dict = [mainDelegate.ScheduleList objectAtIndex: indexPath.row];
     
@@ -491,8 +491,6 @@
         [disclosureImage release];
         
     }
-
-
 
     return cell;
 }
@@ -671,7 +669,8 @@
 			[tmpDict setObject:[dict objectForKey:@"L"] forKey:@"LID"];
 			[tmpDict setObject:[dict objectForKey:@"W"] forKey:@"WID"];
 			[modifiedUserData addObject:tmpDict];
-			[tmpDict release];
+			if(tmpDict)
+				[tmpDict release];
 		}
 		if([[NSFileManager defaultManager] fileExistsAtPath:uploadUserDataDir]){
 			NSArray* toUploadData = [[NSArray alloc] initWithContentsOfFile:uploadUserDataDir];
@@ -685,7 +684,8 @@
 		}
 		[modifiedUserData writeToFile:phaseUserDataDir atomically:YES];
 		[loadingIcon stopAnimating];
-		[modifiedUserData release];
+		if(modifiedUserData)
+			[modifiedUserData release];
 	}];
 	[request2 setFailedBlock:^{
 		[loadingIcon stopAnimating];
@@ -721,8 +721,9 @@
 
 
 
-- (void)dealloc {    
-    [scheduleView release];
+- (void)dealloc {
+	if(scheduleView)
+		[scheduleView release];
     [loadingIcon release];
     [super dealloc];
 }
