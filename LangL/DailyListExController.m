@@ -85,9 +85,6 @@
 			flag = FALSE;
 		}
 	}
-	if(FALSE == flag){
-		return;
-	}
 	
 	for(NSDictionary* dict in OL){
 		if([[dict valueForKey:@"C"] boolValue] == FALSE){
