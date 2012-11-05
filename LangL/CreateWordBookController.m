@@ -184,13 +184,13 @@
             cell.textLabel.text = @"每日任务量";
             switch (mainDelegate.createParams.listCountPerDay) {
                 case 2:
-                    cell.detailTextLabel.text = [NSString stringWithString: @"较少(200单词)"];
+                    cell.detailTextLabel.text = @"较少(200单词)";
                     break;
                 case 3:
-                    cell.detailTextLabel.text = [NSString stringWithString: @"中等(300单词)"];
+                    cell.detailTextLabel.text = @"中等(300单词)";
                     break;
                 case 4:
-                    cell.detailTextLabel.text = [NSString stringWithString: @"较多(400单词)"];
+                    cell.detailTextLabel.text = @"较多(400单词)";
                     break;
                 default:
                     break;
@@ -260,58 +260,107 @@
         return;
     }
     [self showLoadingAlert];
-    NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                             [NSString stringWithFormat:@"%d", mainDelegate.createParams.testType], @"testType",
-                             [NSString stringWithFormat:@"%d", mainDelegate.createParams.sortType], @"sortType",
-                             [NSString stringWithFormat:@"%d", mainDelegate.createParams.listCountPerDay], @"listCountDaily",
-                             [dateFormatter stringFromDate: mainDelegate.createParams.beginDate], @"beginDate",
-                             nil];
+	
+	
+	NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+    NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
+	
+	NSDictionary* userInfo = [[NSDictionary alloc] initWithContentsOfFile:filePath];
+	
+	NSString* email = [userInfo objectForKey:@"UserMail"];
+	NSString* password = [userInfo objectForKey:@"UserPwd"];
     
-
-    NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];    
-    NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/CreateWordBook"];
-
-    __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"]; 
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];    
+	//login first
+	NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+                             email, @"userMail",
+                             password, @"userPwd",
+                             @"iPhone", @"clientTag",
+                             nil];
+	//RPC JSON
+	NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+    NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobileutils.asmx/UserLoginByWordBook"];
+	
+	ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    [request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+    [request addRequestHeader:@"Content-Type" value:@"application/json"];
     [request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
     [request setCompletionBlock:^{
-        NSString *responseString = [request responseString];
-        NSDictionary* responseDict = [responseString JSONValue];
-        [self hideLoadingAlert];
-
-        NSString *responseText = [responseDict objectForKey:@"d"];
-        NSString* responseTag = [responseText substringWithRange:NSMakeRange(0,4)];
-        if ([responseTag compare:@"SUCC"] == NSOrderedSame)
-        {
-            [mainDelegate.WordBookList addObject: [NSDictionary dictionaryWithObjectsAndKeys:
-                 [NSString stringWithFormat:@"%d", mainDelegate.createParams.testType], @"DictType",
-                 @"0", @"IsPaid",
-                 @"1", @"SubCount",
-                 [responseText substringFromIndex: 5], @"WordBookID",
-                 nil]
-            ];
-            [self.navigationController popViewControllerAnimated:YES];
-        }
-        else
-        {
-            UIAlertView *alert = [[UIAlertView alloc]//
-                                  initWithTitle:@"提示"
-                                  message: responseText
-                                  delegate:self
-                                  cancelButtonTitle:@"确定"
-                                  otherButtonTitles:nil];
-            
-            [alert show];
-            [alert release]; 
-        }
-    }];
-    [request setFailedBlock:^{
-        [self hideLoadingAlert];
-        LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
-        [mainDelegate showNetworkFailed];
-    }];
-    [request startAsynchronous];        
+		//upload Token
+		NSString *responseString = [request responseString];
+		NSDictionary* responseDict = [responseString JSONValue];
+		NSString* responseText = (NSString *) [responseDict objectForKey:@"d"];
+		NSString* responseTag = [responseText substringWithRange:NSMakeRange(0,4)];
+		
+		if(![responseTag isEqualToString:@"SUCC"]){
+			[self hideLoadingAlert];
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			[mainDelegate showNetworkFailed];
+			return;
+		}
+		
+		NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+								 [NSString stringWithFormat:@"%d", mainDelegate.createParams.testType], @"testType",
+								 [NSString stringWithFormat:@"%d", mainDelegate.createParams.sortType], @"sortType",
+								 [NSString stringWithFormat:@"%d", mainDelegate.createParams.listCountPerDay], @"listCountDaily",
+								 [dateFormatter stringFromDate: mainDelegate.createParams.beginDate], @"beginDate",
+								 nil];
+		
+		
+		NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+		NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobilewordbook.asmx/CreateWordBook"];
+		
+		__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+		[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+		[request addRequestHeader:@"Content-Type" value:@"application/json"];
+		[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+		[request setCompletionBlock:^{
+			NSString *responseString = [request responseString];
+			NSDictionary* responseDict = [responseString JSONValue];
+			[self hideLoadingAlert];
+			
+			NSString *responseText = [responseDict objectForKey:@"d"];
+			NSString* responseTag = [responseText substringWithRange:NSMakeRange(0,4)];
+						
+			if ([responseTag compare:@"SUCC"] == NSOrderedSame)
+			{
+				[mainDelegate.WordBookList addObject: [NSDictionary dictionaryWithObjectsAndKeys:
+													   [NSString stringWithFormat:@"%d", mainDelegate.createParams.testType], @"DictType",
+													   @"0", @"IsPaid",
+													   @"1", @"SubCount",
+													   [responseText substringFromIndex: 5], @"WordBookID",
+													   nil]
+				 ];
+				//Pop alert view for share
+				SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+				UIAlertView* alert = [[UIAlertView alloc]
+									  initWithTitle:@"提示" message:@"恭喜您成功创建一本词汇书，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+				[alert show];
+				[alert release];
+				
+				[self.navigationController popViewControllerAnimated:YES];
+			}
+			else
+			{
+				UIAlertView *alert = [[UIAlertView alloc]//
+									  initWithTitle:@"提示"
+									  message: responseText
+									  delegate:self
+									  cancelButtonTitle:@"确定"
+									  otherButtonTitles:nil];
+				
+				[alert show];
+				[alert release];
+			}
+		}];
+		[request setFailedBlock:^{
+			[self hideLoadingAlert];
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			[mainDelegate showNetworkFailed];
+		}];
+		[request startAsynchronous];		
+	}];
+	[request startAsynchronous];
 }
 
 - (IBAction)btnCancelTouched:(id)sender {
@@ -320,11 +369,11 @@
 
 -(void)showLoadingAlert
 {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"处理中,请稍候..." message:nil delegate:self cancelButtonTitle:nil otherButtonTitles: nil];    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"处理中,请稍候..." message:nil delegate:self cancelButtonTitle:nil otherButtonTitles: nil];
     [alert show];
     
     UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    indicator.center = CGPointMake(loadingAlert.bounds.size.width / 2, loadingAlert.bounds.size.height - 50);
+    indicator.center = CGPointMake(alert.bounds.size.width / 2, alert.bounds.size.height - 50);
     [indicator startAnimating];
     [alert addSubview:indicator];
     [indicator release];     

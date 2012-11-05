@@ -12,13 +12,13 @@
 #import "AboutController.h"
 #import "NavigateToNextButton.h"
 
-@interface LoginController : UIViewController <UITextFieldDelegate, ShowAboutDelegate> {
+
+@interface LoginController : UIViewController <UITextFieldDelegate> {
     UITextField *textField;   
     UITextField *userpwd; 
     bool forceLogin;
-    CustomizedCheckBox *ckbAutoLogin;
     CommonButton *btnLogin;    
-    UIActivityIndicatorView *loadingHint;    
+    UIActivityIndicatorView *loadingHint;
 }
 
 

@@ -74,6 +74,47 @@
 
 -(void)viewDidAppear:(BOOL)animated
 {
+	
+	NSArray* NL = [dailyListDict valueForKey:@"NL"];
+	NSArray* OL = [dailyListDict valueForKey:@"OL"];
+	
+	BOOL flag = TRUE;
+	
+	for(NSDictionary* dict in NL){
+		if([[dict valueForKey:@"C"] boolValue] == FALSE){
+			flag = FALSE;
+		}
+	}
+	if(FALSE == flag){
+		return;
+	}
+	
+	for(NSDictionary* dict in OL){
+		if([[dict valueForKey:@"C"] boolValue] == FALSE){
+			flag = FALSE;
+		}
+	}
+	
+	if(flag){
+		
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString* filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"Tango.plist"];
+		//check time to see if need to refresh
+		NSDictionary* fileData = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:nil];
+		NSDate* fileDate = [fileData objectForKey:NSFileModificationDate];
+		NSDate* today = [NSDate date];
+		
+		if ([[[today dateByAddingTimeInterval:-(60*60*0.8)] earlierDate:fileDate] isEqualToDate:fileDate] || ![[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+			//Pop alert view for share
+			SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+			UIAlertView* alert = [[UIAlertView alloc]
+								  initWithTitle:@"提示" message:@"恭喜您成功完成了当前练习，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+			[alert show];
+			[alert release];
+		}
+	}
+
     [super viewDidAppear:animated];
     LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate]; 
     if (mainDelegate.NeedReloadSchedule)

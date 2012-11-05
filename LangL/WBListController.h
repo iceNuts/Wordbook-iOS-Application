@@ -10,6 +10,11 @@
 #import <StoreKit/StoreKit.h> 
 #import "PhaseController.h"
 #import "EGORefreshTableHeaderView.h"
+#import "Authorize.h"
+#import "SocialAuthorize.h"
+
+//test
+#import "testViewController.h"
 
 //Add new pull to refresh feature
 

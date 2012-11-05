@@ -53,6 +53,10 @@
 	//Reload prices data
 	filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookPriceInfo.plist"];
 	mainDelegate.ProductPriceArr = [NSArray arrayWithContentsOfFile:filePath];
+	
+	if(NO == [self.navigationController isMovingToParentViewController]){
+		[self performSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)];
+	}
 }
 
 - (void)viewDidLoad
@@ -96,6 +100,7 @@
 		[view release];
 	}
 }
+
 
 #pragma mark -
 #pragma mark Data Source Loading / Reloading Methods
@@ -142,18 +147,14 @@
 			[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
 		}];
 		[request1 setFailedBlock:^{
-			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 			[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
-			[mainDelegate showNetworkFailed];
 		}];
 		
 		[request1 startAsynchronous];
 		
 	}];
 	[request setFailedBlock:^{
-		LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 		[self performSelector:@selector(doneLoadingTableViewData) withObject:nil afterDelay:1.0];
-		[mainDelegate showNetworkFailed];
 	}];
 	[request startAsynchronous];
 }

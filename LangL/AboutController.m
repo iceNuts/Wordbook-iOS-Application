@@ -101,59 +101,15 @@ const CGFloat kScrollObjWidth   = 320.0;
 
 -(void)handleTapFrom:(UITapGestureRecognizer *)recognizer{ 
     [self.delegate aboutController: self];
+	
+	//Pop alert view for share
+	SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+	UIAlertView* alert = [[UIAlertView alloc]
+						  initWithTitle:@"提示" message:@"恭喜您成功安装了朗播词汇书，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+	[alert show];
+	[alert release];
 }
 
-/*
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    // test if our control subview is on-screen
-    if ([touch.view isDescendantOfView:buttonContainer]) {
-            // we touched our control surface
-        return NO; // ignore the touch
-    }
-
-    return YES; // handle the touch
-}
-
-- (void)handleSwipeFrom:(UISwipeGestureRecognizer*)recognizer {    
-    // 触发手勢事件后，在这里作些事情
-    if (recognizer.direction == UISwipeGestureRecognizerDirectionRight)
-    {
-        currPageIdx = currPageIdx - 1;
-        if (currPageIdx == -1)
-            currPageIdx = 2;
-        [self DisplayCurrImage: 0];
-    }
-    else 
-    {       
-        currPageIdx = currPageIdx + 1;
-        if (currPageIdx == 3)
-            currPageIdx = 0;   
-        [self DisplayCurrImage: 1];
-    }   
-    
-}
-
-
--(void)handleTapFrom:(UITapGestureRecognizer *)recognizer{ 
-    [self.delegate aboutController: self];
-}
-
--(void) DisplayCurrImage:(NSInteger)direction
-{
-    CATransition *transition = [CATransition animation];
-    transition.duration = 0.2;
-    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    transition.type = kCATransitionPush;
-    if (direction == 0)
-        transition.subtype = kCATransitionFromLeft;
-    else transition.subtype = kCATransitionFromRight; 
-    transition.delegate = self;
-    [self.view.layer addAnimation:transition forKey:nil]; 
-   
-    [imageContainer setImage:[UIImage imageNamed: [NSString stringWithFormat:@"Welcome_%d.png", currPageIdx + 1]]];
-}
-
-*/
 - (void)viewDidUnload
 {
     [self setScrollView:nil];

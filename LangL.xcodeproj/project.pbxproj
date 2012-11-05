@@ -20,12 +20,21 @@
 		430071531626B819006D4E55 /* whiteArrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4300714B1626B819006D4E55 /* whiteArrow@2x.png */; };
 		430071561627170E006D4E55 /* PhaseController.m in Sources */ = {isa = PBXBuildFile; fileRef = 430071551627170C006D4E55 /* PhaseController.m */; };
 		4300715A1627B1F7006D4E55 /* PhaseController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 430071591627B1F6006D4E55 /* PhaseController.xib */; };
+		432D6CC3163FDCDA00DD26D1 /* SocialAuthorize.m in Sources */ = {isa = PBXBuildFile; fileRef = 432D6CC2163FDCDA00DD26D1 /* SocialAuthorize.m */; };
+		432D6CC61640106000DD26D1 /* AuthorizeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 432D6CC51640106000DD26D1 /* AuthorizeView.m */; };
 		436A899A162BA56B00749B99 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 436A8999162BA56B00749B99 /* libsqlite3.0.dylib */; };
 		436A89A9162BAD1C00749B99 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A899F162BAD1C00749B99 /* ioapi.c */; };
 		436A89AA162BAD1C00749B99 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A1162BAD1C00749B99 /* mztools.c */; };
 		436A89AB162BAD1C00749B99 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A3162BAD1C00749B99 /* unzip.c */; };
 		436A89AC162BAD1C00749B99 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A5162BAD1C00749B99 /* zip.c */; };
 		436A89AD162BAD1C00749B99 /* ZipArchive.mm in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A8162BAD1C00749B99 /* ZipArchive.mm */; };
+		437E15E31642201F0018EBA9 /* testViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 437E15E11642201F0018EBA9 /* testViewController.m */; };
+		437E15E41642201F0018EBA9 /* testViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 437E15E21642201F0018EBA9 /* testViewController.xib */; };
+		439603EA1640BDDD00EE95C2 /* WBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 439603E91640BDDD00EE95C2 /* WBRequest.m */; };
+		439603ED1640BE7100EE95C2 /* WBUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 439603EC1640BE7100EE95C2 /* WBUtil.m */; };
+		439603F21640BEFA00EE95C2 /* GTMBase64.m in Sources */ = {isa = PBXBuildFile; fileRef = 439603F01640BEFA00EE95C2 /* GTMBase64.m */; };
+		4396040E1640CAFE00EE95C2 /* Authorize.m in Sources */ = {isa = PBXBuildFile; fileRef = 4396040D1640CAFE00EE95C2 /* Authorize.m */; };
+		4396C9D1164750D300415FBA /* SocialAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 4396C9D0164750D300415FBA /* SocialAlert.m */; };
 		6A54A30313F785EB00D6CF93 /* LoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A54A30113F785EB00D6CF93 /* LoginController.m */; };
 		6A54A30413F785EB00D6CF93 /* LoginController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6A54A30213F785EB00D6CF93 /* LoginController.xib */; };
 		6A7EA2EE1462E5DC00BB545C /* NavigateToPrevButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A7EA2ED1462E5DC00BB545C /* NavigateToPrevButton.m */; };
@@ -262,6 +271,10 @@
 		430071541627170B006D4E55 /* PhaseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhaseController.h; sourceTree = "<group>"; };
 		430071551627170C006D4E55 /* PhaseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhaseController.m; sourceTree = "<group>"; };
 		430071591627B1F6006D4E55 /* PhaseController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhaseController.xib; sourceTree = "<group>"; };
+		432D6CC1163FDCDA00DD26D1 /* SocialAuthorize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialAuthorize.h; sourceTree = "<group>"; };
+		432D6CC2163FDCDA00DD26D1 /* SocialAuthorize.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialAuthorize.m; sourceTree = "<group>"; };
+		432D6CC41640106000DD26D1 /* AuthorizeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AuthorizeView.h; sourceTree = "<group>"; };
+		432D6CC51640106000DD26D1 /* AuthorizeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AuthorizeView.m; sourceTree = "<group>"; };
 		436A8999162BA56B00749B99 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
 		436A899E162BAD1C00749B99 /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
 		436A899F162BAD1C00749B99 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
@@ -274,6 +287,23 @@
 		436A89A6162BAD1C00749B99 /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
 		436A89A7162BAD1C00749B99 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
 		436A89A8162BAD1C00749B99 /* ZipArchive.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ZipArchive.mm; sourceTree = "<group>"; };
+		437E15E01642201F0018EBA9 /* testViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testViewController.h; path = test/testViewController.h; sourceTree = SOURCE_ROOT; };
+		437E15E11642201F0018EBA9 /* testViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = testViewController.m; path = test/testViewController.m; sourceTree = SOURCE_ROOT; };
+		437E15E21642201F0018EBA9 /* testViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = testViewController.xib; path = test/testViewController.xib; sourceTree = SOURCE_ROOT; };
+		439603E61640B9A100EE95C2 /* AuthorizeWebViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AuthorizeWebViewDelegate.h; sourceTree = "<group>"; };
+		439603E81640BDDD00EE95C2 /* WBRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WBRequest.h; path = WBRequest/WBRequest.h; sourceTree = SOURCE_ROOT; };
+		439603E91640BDDD00EE95C2 /* WBRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WBRequest.m; path = WBRequest/WBRequest.m; sourceTree = SOURCE_ROOT; };
+		439603EB1640BE7100EE95C2 /* WBUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WBUtil.h; path = WBRequest/WBUtil.h; sourceTree = SOURCE_ROOT; };
+		439603EC1640BE7100EE95C2 /* WBUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WBUtil.m; path = WBRequest/WBUtil.m; sourceTree = SOURCE_ROOT; };
+		439603EE1640BEC200EE95C2 /* WBSDKGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WBSDKGlobal.h; path = WBRequest/WBSDKGlobal.h; sourceTree = SOURCE_ROOT; };
+		439603EF1640BEFA00EE95C2 /* GTMBase64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTMBase64.h; path = WBRequest/GTMBase64.h; sourceTree = SOURCE_ROOT; };
+		439603F01640BEFA00EE95C2 /* GTMBase64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GTMBase64.m; path = WBRequest/GTMBase64.m; sourceTree = SOURCE_ROOT; };
+		439603F11640BEFA00EE95C2 /* GTMDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTMDefines.h; path = WBRequest/GTMDefines.h; sourceTree = SOURCE_ROOT; };
+		4396040C1640CAFE00EE95C2 /* Authorize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Authorize.h; sourceTree = "<group>"; };
+		4396040D1640CAFE00EE95C2 /* Authorize.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Authorize.m; sourceTree = "<group>"; };
+		439604121640CD7E00EE95C2 /* AuthorizeDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AuthorizeDelegate.h; sourceTree = "<group>"; };
+		4396C9CF164750D300415FBA /* SocialAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialAlert.h; sourceTree = "<group>"; };
+		4396C9D0164750D300415FBA /* SocialAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialAlert.m; sourceTree = "<group>"; };
 		6A54A30013F785EB00D6CF93 /* LoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoginController.h; path = ../LoginController.h; sourceTree = "<group>"; };
 		6A54A30113F785EB00D6CF93 /* LoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LoginController.m; path = ../LoginController.m; sourceTree = "<group>"; };
 		6A54A30213F785EB00D6CF93 /* LoginController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LoginController.xib; path = ../LoginController.xib; sourceTree = "<group>"; };
@@ -573,6 +603,26 @@
 			name = PullToRefresh;
 			sourceTree = "<group>";
 		};
+		432D6CBB163FD32D00DD26D1 /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				432D6CC1163FDCDA00DD26D1 /* SocialAuthorize.h */,
+				432D6CC2163FDCDA00DD26D1 /* SocialAuthorize.m */,
+				432D6CC41640106000DD26D1 /* AuthorizeView.h */,
+				432D6CC51640106000DD26D1 /* AuthorizeView.m */,
+				439603E61640B9A100EE95C2 /* AuthorizeWebViewDelegate.h */,
+				4396040C1640CAFE00EE95C2 /* Authorize.h */,
+				4396040D1640CAFE00EE95C2 /* Authorize.m */,
+				439604121640CD7E00EE95C2 /* AuthorizeDelegate.h */,
+				437E15E01642201F0018EBA9 /* testViewController.h */,
+				437E15E11642201F0018EBA9 /* testViewController.m */,
+				437E15E21642201F0018EBA9 /* testViewController.xib */,
+				4396C9CF164750D300415FBA /* SocialAlert.h */,
+				4396C9D0164750D300415FBA /* SocialAlert.m */,
+			);
+			name = Social;
+			sourceTree = "<group>";
+		};
 		436A899B162BAD0D00749B99 /* zip */ = {
 			isa = PBXGroup;
 			children = (
@@ -733,6 +783,14 @@
 		6A830B34145C5F560099316F /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				439603EF1640BEFA00EE95C2 /* GTMBase64.h */,
+				439603F01640BEFA00EE95C2 /* GTMBase64.m */,
+				439603F11640BEFA00EE95C2 /* GTMDefines.h */,
+				439603EE1640BEC200EE95C2 /* WBSDKGlobal.h */,
+				439603EB1640BE7100EE95C2 /* WBUtil.h */,
+				439603EC1640BE7100EE95C2 /* WBUtil.m */,
+				439603E81640BDDD00EE95C2 /* WBRequest.h */,
+				439603E91640BDDD00EE95C2 /* WBRequest.m */,
 				6A830B35145C5F920099316F /* CustomizedCheckBox.h */,
 				6A830B36145C5F920099316F /* CustomizedCheckBox.m */,
 				6A8F6206145D23890020D278 /* CommonButton.h */,
@@ -886,6 +944,7 @@
 		6A912BAB13F76F4000C39D3A /* LangL */ = {
 			isa = PBXGroup;
 			children = (
+				432D6CBB163FD32D00DD26D1 /* Social */,
 				6A8E6904148235EC00D3F36B /* WelcomePic */,
 				6A91AB73146FAE39003936D7 /* Cells */,
 				6A830B34145C5F560099316F /* Utils */,
@@ -1214,6 +1273,7 @@
 				430071521626B819006D4E55 /* whiteArrow.png in Resources */,
 				430071531626B819006D4E55 /* whiteArrow@2x.png in Resources */,
 				4300715A1627B1F7006D4E55 /* PhaseController.xib in Resources */,
+				437E15E41642201F0018EBA9 /* testViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1282,6 +1342,14 @@
 				436A89AB162BAD1C00749B99 /* unzip.c in Sources */,
 				436A89AC162BAD1C00749B99 /* zip.c in Sources */,
 				436A89AD162BAD1C00749B99 /* ZipArchive.mm in Sources */,
+				432D6CC3163FDCDA00DD26D1 /* SocialAuthorize.m in Sources */,
+				432D6CC61640106000DD26D1 /* AuthorizeView.m in Sources */,
+				439603EA1640BDDD00EE95C2 /* WBRequest.m in Sources */,
+				439603ED1640BE7100EE95C2 /* WBUtil.m in Sources */,
+				439603F21640BEFA00EE95C2 /* GTMBase64.m in Sources */,
+				4396040E1640CAFE00EE95C2 /* Authorize.m in Sources */,
+				437E15E31642201F0018EBA9 /* testViewController.m in Sources */,
+				4396C9D1164750D300415FBA /* SocialAlert.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

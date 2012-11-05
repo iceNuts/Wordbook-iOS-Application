@@ -120,6 +120,11 @@
     NSString *DoucumentsDirectiory =    [StoreFilePath objectAtIndex:0];
     NSString *filePath                =    [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
     
+	if(![[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+		[self performSelector:@selector(showAbout)];
+		return;
+	}
+	
     NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
     NSString *savedMail = [plistDict objectForKey:@"UserMail"];
     NSString *savedPwd = [plistDict objectForKey:@"UserPwd"];

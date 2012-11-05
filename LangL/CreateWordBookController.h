@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SocialAlert.h"
 
 @interface CreateWordBookController : UIViewController<UITableViewDelegate, UITableViewDataSource>{
     UITableView *createParaView;

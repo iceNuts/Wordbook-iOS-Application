@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "EGORefreshTableHeaderView.h"
+#import "testViewController.h"
 
 @interface ScheduleController : UIViewController<UITableViewDelegate, UITableViewDataSource,EGORefreshTableHeaderDelegate>{
     UITableView *scheduleView;

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "testViewController.h"
 
 @interface DailyListExController : UIViewController<UITableViewDelegate, UITableViewDataSource>{
     UITableView *dailyListView;

@@ -153,6 +153,10 @@
     self.title = [mainDelegate GetDictNameByType:mainDelegate.CurrDictType];
 }
 
+-(void) viewDidAppear:(BOOL)animated{
+	[scheduleView reloadData];
+}
+
 
 - (void)requestFinished:(ASIHTTPRequest *)request
 {
@@ -436,7 +440,7 @@
             [cell.contentView addSubview: hint2];
 			if(hint2)
 				[hint2 release];
-        }        
+        }
         else 
         {
             if ([currDateStr compare:[dict valueForKey:@"CDate"]] == NSOrderedSame)

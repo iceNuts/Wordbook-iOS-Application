@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SocialAlert.h"
 
 @protocol ShowAboutDelegate;
 
