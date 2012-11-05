@@ -806,6 +806,44 @@
         if (buttonIndex == 0)
         {
             [self.navigationController popToViewController:[self.navigationController.viewControllers  objectAtIndex:self.navigationController.viewControllers.count - 3] animated:YES];
+			
+			NSDictionary* dailyListDict;
+			
+			LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+			for (NSDictionary *schedule in mainDelegate.ScheduleList) {
+				if ([[schedule objectForKey:@"Idx"] integerValue] == mainDelegate.CurrItemIdx) {
+					dailyListDict = schedule;
+					break;
+				}
+			}
+			
+			NSArray* NL = [dailyListDict valueForKey:@"NL"];
+			NSArray* OL = [dailyListDict valueForKey:@"OL"];
+			
+			BOOL flag = TRUE;
+			
+			for(NSDictionary* dict in NL){
+				if([[dict valueForKey:@"C"] boolValue] == FALSE){
+					flag = FALSE;
+				}
+			}
+			
+			for(NSDictionary* dict in OL){
+				if([[dict valueForKey:@"C"] boolValue] == FALSE){
+					flag = FALSE;
+				}
+			}
+			
+			if(flag){
+				//Pop alert view for share
+				SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+				UIAlertView* alert = [[UIAlertView alloc]
+									  initWithTitle:@"提示" message:@"恭喜您成功完成了当前练习，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+				[alert show];
+				[alert release];
+
+			}
+			
         }
         else 
         {

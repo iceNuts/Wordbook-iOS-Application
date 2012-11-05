@@ -155,6 +155,25 @@
 
 -(void) viewDidAppear:(BOOL)animated{
 	[scheduleView reloadData];
+	
+	if(isAllFinished){
+		LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+		NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+		NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:mainDelegate.CurrWordBookID];
+		NSString *phaseDir = [bookDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d",mainDelegate.CurrPhaseIdx]];
+		NSString *filePath = [phaseDir stringByAppendingPathComponent:@"show"];
+		if(![[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+			//Pop alert view for share
+			SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+			UIAlertView* alert = [[UIAlertView alloc]
+								  initWithTitle:@"提示" message:@"恭喜您完成了本阶段练习，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+			[alert show];
+			[alert release];
+			
+			[[NSFileManager defaultManager] createDirectoryAtPath:filePath withIntermediateDirectories:YES attributes:nil error:nil];
+		}
+	}
 }
 
 
@@ -422,7 +441,7 @@
             
         }
         
-
+		isAllFinished = NO;
         
         if (complete == total)
         {
@@ -440,6 +459,7 @@
             [cell.contentView addSubview: hint2];
 			if(hint2)
 				[hint2 release];
+			isAllFinished = YES;
         }
         else 
         {
@@ -463,6 +483,7 @@
             UILabel *hint2 = [[UILabel alloc] initWithFrame:CGRectMake(60, 30, 150, 20)];
             hint2.textColor = [UIColor colorWithRed:255.0/255.0 green:160.0/255.0 blue:0.0/255.0 alpha:1];
             hint2.text = @"未完成";
+			isAllFinished = NO;
             hint2.font = [UIFont systemFontOfSize:13];
             hint2.backgroundColor = [UIColor clearColor];
             [cell.contentView addSubview: hint2];
@@ -483,6 +504,7 @@
     }
     else
     {
+		isAllFinished = NO;
         UILabel *hint2 = [[UILabel alloc] initWithFrame:CGRectMake(60, 30, 150, 20)];
         hint2.textColor = [UIColor colorWithRed:255.0/255.0 green:160.0/255.0 blue:0.0/255.0 alpha:1];
         hint2.text = @"未完成";

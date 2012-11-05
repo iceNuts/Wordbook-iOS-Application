@@ -57,6 +57,9 @@
 								 dateString,@"expDate", accessToken,@"tokenKey",
 								 [authorize snsType],@"tokenType",
 								 nil];
+		
+		NSLog(@"%@", reqDict);
+		
 		//RPC JSON
 		NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
 		NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/mobile/ws_mobileutils.asmx/UpdateTokenKey"];

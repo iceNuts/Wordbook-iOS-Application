@@ -16,6 +16,7 @@
     NSString *currDateStr;
     UIActivityIndicatorView *loadingIcon;
 	EGORefreshTableHeaderView *_refreshHeaderView;
+	BOOL isAllFinished;
 }
 
 @property (nonatomic, retain) UITableView *scheduleView;
