@@ -13,7 +13,7 @@
 -(void) show:(BOOL) animated{
 	wd = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	wd.screen = [UIScreen mainScreen];
-	[wd setWindowLevel: UIWindowLevelAlert];
+	[wd setWindowLevel: UIWindowLevelNormal];
 	
 	id root = [[UIViewController alloc] init];
 	

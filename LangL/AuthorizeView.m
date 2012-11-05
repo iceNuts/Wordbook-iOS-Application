@@ -139,7 +139,7 @@
 		window = [[UIApplication sharedApplication].windows objectAtIndex:0];
 	}
   	[window addSubview:self];
-    
+		
     if (animated)
     {
         [panelView setAlpha:0];
