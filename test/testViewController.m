@@ -114,6 +114,7 @@
 			NSDictionary* responseDict1 = [[request responseString] JSONValue];
 			NSArray* tokens = (NSArray *) [responseDict1 objectForKey:@"d"];
 			NSString* accessToken;
+						
 			for(NSString* tokenString in tokens){
 				
 				NSRange qq = [tokenString rangeOfString:@"qqweibo"];
@@ -135,6 +136,9 @@
 					NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"LangLibWordBookConfig.plist"];
 					
 					NSDictionary* userInfo = [[NSDictionary alloc] initWithContentsOfFile:filePath];
+					if(nil == [userInfo objectForKey:@"qqweibo"]){
+						continue;
+					}
 					
 					[params setObject:[userInfo objectForKey:@"qqweibo"] forKey:@"openid"];
 					
