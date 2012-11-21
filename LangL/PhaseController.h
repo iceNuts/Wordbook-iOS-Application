@@ -14,9 +14,11 @@
 #import "ASINetworkQueue.h"
 #import "sqlite3.h"
 #import "ZipArchive.h"
+#import "NavigationButton.h"
+#import "notificationTestViewController.h"
 
 
-@interface PhaseController : UIViewController<UITableViewDelegate, UITableViewDataSource,UIActionSheetDelegate>{
+@interface PhaseController : UIViewController<UITableViewDelegate, UITableViewDataSource,UIActionSheetDelegate, notificationViewControllerDelegate>{
 	UITableView *myTableView;
 	UIActivityIndicatorView *loadingIcon;
 	UITableViewCell* downloadCell;
@@ -26,6 +28,7 @@
 	BOOL downloadCanceled;
 	ASIHTTPRequest *downloadRequest;
 	ASINetworkQueue *downloadQueue;
+	id notifyViewController;
 	BOOL mp3done;
 }
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingIcon;
@@ -35,4 +38,5 @@
 - (void)downloadQueueFinished;
 - (void)downloadQueueFailed:(ASIHTTPRequest *)request;
 - (void)fetchMp3Data;
+- (void)subscribeNotification;
 @end

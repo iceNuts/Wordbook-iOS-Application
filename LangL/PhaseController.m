@@ -34,6 +34,8 @@
 	isDownloading = NO;
 	downloadProgress = nil;
 	downloadCell = nil;
+	downloadQueue = nil;
+	downloadRequest = nil;
 	
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 	
@@ -77,7 +79,32 @@
     myTableView.backgroundView = nil;
     self.navigationController.toolbarHidden = YES;
     self.title = @"阶段列表";
+
+//	//Button for subscribing notifications
+//	NavigationButton *btnNotification = [[NavigationButton alloc] init];
+//	[btnNotification setTitle:@"提 醒" forState:UIControlStateNormal];
+//    [btnNotification addTarget:self action:@selector(subscribeNotification) forControlEvents:UIControlEventTouchUpInside];
+//    //定制自己的风格的  UIBarButtonItem
+//    UIBarButtonItem* notificationBtnItem = [[UIBarButtonItem alloc] initWithCustomView:btnNotification];
+//    [self.navigationItem  setRightBarButtonItem:notificationBtnItem];
+//    [notificationBtnItem release];
+//    [btnNotification release];
+	
     [loadingIcon stopAnimating];
+}
+
+- (void)subscribeNotification{
+	
+	notifyViewController = [[notificationTestViewController alloc] initWithNibName:@"notificationViewController" bundle:nil];
+	[notifyViewController setDelegate:self];
+	[self presentModalViewController:notifyViewController animated:YES];
+}
+
+-(void) notificationViewWillCancel{
+	[notifyViewController dismissModalViewControllerAnimated:YES];
+}
+-(void) notificationViewWillConfirm{
+	
 }
 
 - (void)viewDidUnload
@@ -91,6 +118,7 @@
 	[super dealloc];
 	if(myTableView)
 		[myTableView release];
+	[notifyViewController release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -145,6 +173,19 @@
 	NSString *bookDir = [DoucumentsDirectiory stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
 	NSString *dbDir = [bookDir stringByAppendingString:@".db"];
 	
+	if([[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+		//Judge if its size is zero
+		NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:dbDir error:nil];
+		
+		NSNumber *fileSizeNumber = [fileAttributes objectForKey:NSFileSize];
+		long long fileSize = [fileSizeNumber longLongValue];
+				
+		if(0 == fileSize){
+			[[NSFileManager defaultManager] removeItemAtPath:dbDir error:nil];
+		}
+		
+	}
+		
 	if(indexPath.row ==mainDelegate.PhaseCount && (![[NSFileManager defaultManager] fileExistsAtPath:dbDir] || mp3done == NO)){
 		NSString *bookIcon;
 		int dictType = mainDelegate.CurrDictType;
@@ -198,11 +239,6 @@
 				bookIcon = @"ico_books.png";
 				break;
 		}
-		UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed: bookIcon]];
-		[iconImage setFrame: CGRectMake(10, 10, 80, 80)];
-		[cell.contentView addSubview: iconImage];
-		if(iconImage)
-			[iconImage release];
 		
 		UILabel *hint1 = [[UILabel alloc] initWithFrame:CGRectMake(110, 45, 240, 30)];
 		hint1.textColor = [UIColor lightTextColor];
@@ -212,20 +248,34 @@
 		if(hint1)
 			[hint1 release];
 		
+		NSMutableString* tmp = [bookIcon mutableCopy];
+		NSRange range = [bookIcon rangeOfString:@"."];
+		
 		if(!hasPaid){
 			cell.userInteractionEnabled = NO;
 			hint1.text = @"购买后支持离线背诵单词";
+			[tmp insertString:@"_none" atIndex: range.location];
 		}else{
 			cell.userInteractionEnabled = YES;
 			if(isDownloading)
 				hint1.text = @"点击取消下载";
 			else{
-				if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done == NO)
-					hint1.text = @"下载离线语音";
-				else
-					hint1.text = @"下载离线词库";
+				if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done == NO){
+					hint1.text = @"下载离线音频";
+					[tmp insertString:@"_voice" atIndex: range.location];
+				}else{
+					hint1.text = @"下载离线词库和音频";
+					[tmp insertString:@"_all" atIndex: range.location];
+				}
 			}
 		}
+		bookIcon = [tmp copy];
+		
+		UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed: bookIcon]];
+		[iconImage setFrame: CGRectMake(10, 10, 80, 80)];
+		[cell.contentView addSubview: iconImage];
+		if(iconImage)
+			[iconImage release];
 		downloadCell = cell;
 		return  cell;
 	}
@@ -510,26 +560,32 @@
 			[self performSelector:@selector(fetchMp3Data)];
 			return;
 		}
-		ASIHTTPRequest* request = [ASIHTTPRequest requestWithURL:url];
-		[request setDownloadDestinationPath:dbZipDir];
-		[request setCompletionBlock:^{
+		downloadRequest = [ASIHTTPRequest requestWithURL:url];
+		[downloadRequest setDownloadDestinationPath:dbZipDir];
+		[downloadRequest setCompletionBlock:^{
 			//unzip zip to db
 			ZipArchive *zipArchive = [[ZipArchive alloc] init];
-			[zipArchive UnzipOpenFile:dbZipDir];
-			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
-			[zipArchive UnzipCloseFile];
-			if(zipArchive)
-				[zipArchive release];
-			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
-			[self performSelectorOnMainThread:@selector(fetchMp3Data) withObject:nil waitUntilDone:1.0f];
+			if([[NSFileManager defaultManager] fileExistsAtPath:dbZipDir]){
+				[zipArchive UnzipOpenFile:dbZipDir];
+				[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
+				[zipArchive UnzipCloseFile];
+				if(zipArchive)
+					[zipArchive release];
+				[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
+				[self performSelector:@selector(fetchMp3Data)];
+			}
+			[downloadRequest release];
+			downloadRequest = nil;
 		}];
 		[downloadRequest setFailedBlock:^{
 			isDownloading = NO;
 			[mainDelegate showNetworkFailed];
-			[downloadRequest clearDelegatesAndCancel];
 			[myTableView reloadData];
+			[downloadRequest clearDelegatesAndCancel];
+			[downloadRequest release];
+			downloadRequest = nil;
 		}];
-		[request startAsynchronous];
+		[downloadRequest startAsynchronous];
 	}else{
 		//Words ONLY
 		NSString* downloadFilePath;
@@ -554,26 +610,36 @@
 			//Notify user successful
 			[mainDelegate showDownloadSuccess];
 			//unzip zip to db
-			ZipArchive *zipArchive = [[ZipArchive alloc] init];
-			[zipArchive UnzipOpenFile:dbZipDir];
-			[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
-			[zipArchive UnzipCloseFile];
-			if(zipArchive)
-				[zipArchive release];
-			[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
+			if([[NSFileManager defaultManager] fileExistsAtPath:dbZipDir]){
+				ZipArchive *zipArchive = [[ZipArchive alloc] init];
+				[zipArchive UnzipOpenFile:dbZipDir];
+				[zipArchive UnzipFileTo:DoucumentsDirectiory overWrite:YES];
+				[zipArchive UnzipCloseFile];
+				if(zipArchive)
+					[zipArchive release];
+				[[NSFileManager defaultManager] removeItemAtPath:dbZipDir error:nil];
+			}
 			[myTableView reloadData];
+			[downloadRequest release];
+			downloadRequest = nil;
 		}];
 		[downloadRequest setFailedBlock:^{
 			isDownloading = NO;
 			[mainDelegate showNetworkFailed];
-			[downloadRequest clearDelegatesAndCancel];
 			[myTableView reloadData];
+			[downloadRequest clearDelegatesAndCancel];
+			[downloadRequest release];
+			downloadRequest = nil;
 		}];
 		[downloadRequest startAsynchronous];
 	}
 }
 
 - (void)fetchMp3Data{
+	if(downloadQueue){
+		[downloadQueue release];
+		downloadQueue = nil;
+	}
 	downloadQueue = [ASINetworkQueue queue];
 	[downloadQueue setDelegate: self];
 	[downloadQueue setDownloadProgressDelegate:downloadProgress];
@@ -619,17 +685,28 @@
 }
 
 - (void)stopDownloadData{
+	if(downloadRequest){
+		if([downloadRequest respondsToSelector:@selector(clearDelegatesAndCancel)]){
+			if(![downloadRequest complete])
+				[downloadRequest clearDelegatesAndCancel];
+		}
+	}
 	if(isDataWithMusic){
 		mp3done = NO;
 		downloadCanceled = YES;
-		if(downloadQueue)
-			[downloadQueue cancelAllOperations];
-	}else{
-		[downloadRequest clearDelegatesAndCancel];
+		if(downloadQueue){
+			if([downloadQueue respondsToSelector:@selector(cancelAllOperations)])
+				[downloadQueue cancelAllOperations];
+		}
 	}
 }
 
 - (void)downloadQueueFinished{
+	
+	[downloadQueue cancelAllOperations];
+	[downloadQueue release];
+	downloadQueue = nil;
+	
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
 	if(mp3done == NO && isDownloading){
 		isDownloading = NO;

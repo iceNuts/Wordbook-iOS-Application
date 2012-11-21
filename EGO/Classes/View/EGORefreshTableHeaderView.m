@@ -44,14 +44,19 @@
     if((self = [super initWithFrame:frame])) {
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-		self.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
+		
+		UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"bg_pullRefresh.png"]];
+		self.backgroundColor = background;
+		
+		//self.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
 
 		UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 30.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		label.font = [UIFont systemFontOfSize:12.0f];
-		label.textColor = textColor;
-		label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-		label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		//label.textColor = textColor;
+		label.textColor = [UIColor whiteColor];
+		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
+		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
 		label.textAlignment = UITextAlignmentCenter;
 		[self addSubview:label];
@@ -61,9 +66,10 @@
 		label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 48.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		label.font = [UIFont boldSystemFontOfSize:13.0f];
-		label.textColor = textColor;
-		label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-		label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		//label.textColor = textColor;
+		label.textColor = [UIColor whiteColor];
+		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
+		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
 		label.textAlignment = UITextAlignmentCenter;
 		[self addSubview:label];
@@ -85,6 +91,7 @@
 		_arrowImage=layer;
 		
 		UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+		view.color = [UIColor whiteColor];
 		view.frame = CGRectMake(25.0f, frame.size.height - 38.0f, 20.0f, 20.0f);
 		[self addSubview:view];
 		_activityView = view;
@@ -100,7 +107,7 @@
 }
 
 - (id)initWithFrame:(CGRect)frame  {
-  return [self initWithFrame:frame arrowImageName:@"blueArrow.png" textColor:TEXT_COLOR];
+  return [self initWithFrame:frame arrowImageName:@"whiteArrow.png" textColor:TEXT_COLOR];
 }
 
 #pragma mark -
@@ -134,7 +141,7 @@
 	switch (aState) {
 		case EGOOPullRefreshPulling:
 			
-			_statusLabel.text = NSLocalizedString(@"放开开始同步", @"Release to refresh status");
+			_statusLabel.text = NSLocalizedString(@"放开开始同步学习数据", @"Release to refresh status");
 			[CATransaction begin];
 			[CATransaction setAnimationDuration:FLIP_ANIMATION_DURATION];
 			_arrowImage.transform = CATransform3DMakeRotation((M_PI / 180.0) * 180.0f, 0.0f, 0.0f, 1.0f);
@@ -150,7 +157,7 @@
 				[CATransaction commit];
 			}
 			
-			_statusLabel.text = NSLocalizedString(@"下拉同步数据", @"Pull down to refresh status");
+			_statusLabel.text = NSLocalizedString(@"下拉同步学习数据", @"Pull down to refresh status");
 			[_activityView stopAnimating];
 			[CATransaction begin];
 			[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions]; 
@@ -163,7 +170,7 @@
 			break;
 		case EGOOPullRefreshLoading:
 			
-			_statusLabel.text = NSLocalizedString(@"正在同步...", @"Loading Status");
+			_statusLabel.text = NSLocalizedString(@"正在同步您的学习数据", @"Loading Status");
 			[_activityView startAnimating];
 			[CATransaction begin];
 			[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions]; 

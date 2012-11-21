@@ -332,11 +332,11 @@
 													   nil]
 				 ];
 				//Pop alert view for share
-				SocialAlert* alertDelegate = [[SocialAlert alloc] init];
-				UIAlertView* alert = [[UIAlertView alloc]
-									  initWithTitle:@"提示" message:@"恭喜您成功创建一本词汇书，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
-				[alert show];
-				[alert release];
+//				SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+//				UIAlertView* alert = [[UIAlertView alloc]
+//									  initWithTitle:@"提示" message:@"恭喜您成功创建一本词汇书，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+//				[alert show];
+//				[alert release];
 				
 				[self.navigationController popViewControllerAnimated:YES];
 			}

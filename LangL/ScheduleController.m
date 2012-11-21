@@ -165,11 +165,11 @@
 		NSString *filePath = [phaseDir stringByAppendingPathComponent:@"show"];
 		if(![[NSFileManager defaultManager] fileExistsAtPath:filePath]){
 			//Pop alert view for share
-			SocialAlert* alertDelegate = [[SocialAlert alloc] init];
-			UIAlertView* alert = [[UIAlertView alloc]
-								  initWithTitle:@"提示" message:@"恭喜您完成了本阶段练习，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
-			[alert show];
-			[alert release];
+//			SocialAlert* alertDelegate = [[SocialAlert alloc] init];
+//			UIAlertView* alert = [[UIAlertView alloc]
+//								  initWithTitle:@"提示" message:@"恭喜您完成了本阶段练习，将这个消息告诉朋友？" delegate:alertDelegate cancelButtonTitle:@"取消" otherButtonTitles:@"好的", nil];
+//			[alert show];
+//			[alert release];
 			
 			[[NSFileManager defaultManager] createDirectoryAtPath:filePath withIntermediateDirectories:YES attributes:nil error:nil];
 		}
