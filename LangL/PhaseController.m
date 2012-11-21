@@ -703,8 +703,6 @@
 
 - (void)downloadQueueFinished{
 	
-	[downloadQueue cancelAllOperations];
-	[downloadQueue release];
 	downloadQueue = nil;
 	
 	LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
