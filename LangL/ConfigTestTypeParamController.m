@@ -103,7 +103,7 @@
             cell.tag = 1;
             break;    
         case 1:
-            cell.tag = 14;
+            cell.tag = 15;
             break;  
         case 2:
             cell.tag = 12;

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		320AF8492C47A4D819F7C451 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 320AF8492C47A4D819F7C450 /* QuartzCore.framework */; };
-		320B6C86F11D9990244A9731 /* Three20.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 320B6C86F11D9990244A9730 /* Three20.bundle */; };
 		430071431626B7F5006D4E55 /* EGORefreshTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 430071421626B7F5006D4E55 /* EGORefreshTableHeaderView.m */; };
 		4300714C1626B819006D4E55 /* blackArrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 430071441626B818006D4E55 /* blackArrow.png */; };
 		4300714D1626B819006D4E55 /* blackArrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 430071451626B819006D4E55 /* blackArrow@2x.png */; };
@@ -61,6 +60,8 @@
 		436A89AB162BAD1C00749B99 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A3162BAD1C00749B99 /* unzip.c */; };
 		436A89AC162BAD1C00749B99 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A5162BAD1C00749B99 /* zip.c */; };
 		436A89AD162BAD1C00749B99 /* ZipArchive.mm in Sources */ = {isa = PBXBuildFile; fileRef = 436A89A8162BAD1C00749B99 /* ZipArchive.mm */; };
+		436A8E9E16782E7100EE035F /* step.png in Resources */ = {isa = PBXBuildFile; fileRef = 436A8E9C16782E7100EE035F /* step.png */; };
+		436A8E9F16782E7100EE035F /* step@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 436A8E9D16782E7100EE035F /* step@2x.png */; };
 		437E15E31642201F0018EBA9 /* testViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 437E15E11642201F0018EBA9 /* testViewController.m */; };
 		437E15E41642201F0018EBA9 /* testViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 437E15E21642201F0018EBA9 /* testViewController.xib */; };
 		439603EA1640BDDD00EE95C2 /* WBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 439603E91640BDDD00EE95C2 /* WBRequest.m */; };
@@ -354,6 +355,8 @@
 		436A89A6162BAD1C00749B99 /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
 		436A89A7162BAD1C00749B99 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
 		436A89A8162BAD1C00749B99 /* ZipArchive.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ZipArchive.mm; sourceTree = "<group>"; };
+		436A8E9C16782E7100EE035F /* step.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = step.png; path = UI/pic/step.png; sourceTree = SOURCE_ROOT; };
+		436A8E9D16782E7100EE035F /* step@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "step@2x.png"; path = "UI/pic/step@2x.png"; sourceTree = SOURCE_ROOT; };
 		437E15E01642201F0018EBA9 /* testViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testViewController.h; path = test/testViewController.h; sourceTree = SOURCE_ROOT; };
 		437E15E11642201F0018EBA9 /* testViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = testViewController.m; path = test/testViewController.m; sourceTree = SOURCE_ROOT; };
 		437E15E21642201F0018EBA9 /* testViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = testViewController.xib; path = test/testViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -739,6 +742,8 @@
 		6A830A9C145C55310099316F /* Pic */ = {
 			isa = PBXGroup;
 			children = (
+				436A8E9C16782E7100EE035F /* step.png */,
+				436A8E9D16782E7100EE035F /* step@2x.png */,
 				433C3444165C741600B29B30 /* bg_pullRefresh.png */,
 				433C343E165C728400B29B30 /* ico_books_gre_3_all.png */,
 				433C343F165C728400B29B30 /* ico_books_gre_3_none.png */,
@@ -1229,7 +1234,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				320B6C86F11D9990244A9731 /* Three20.bundle in Resources */,
 				6A912BB013F76F4000C39D3A /* InfoPlist.strings in Resources */,
 				6A912BB913F76F4000C39D3A /* MainWindow.xib in Resources */,
 				6A54A30413F785EB00D6CF93 /* LoginController.xib in Resources */,
@@ -1419,6 +1423,8 @@
 				433C3442165C728400B29B30 /* ico_books_gre_3_none.png in Resources */,
 				433C3443165C728400B29B30 /* ico_books_gre_3_voice.png in Resources */,
 				433C3445165C741600B29B30 /* bg_pullRefresh.png in Resources */,
+				436A8E9E16782E7100EE035F /* step.png in Resources */,
+				436A8E9F16782E7100EE035F /* step@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

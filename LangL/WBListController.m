@@ -347,6 +347,9 @@
         case 14:
             bookIcon = @"ico_books_kaoyan.png";
             break;
+		case 15:
+			bookIcon = @"ico_books_kaoyan.png";
+			break;
         default:
             bookIcon = @"ico_books.png";
             break;

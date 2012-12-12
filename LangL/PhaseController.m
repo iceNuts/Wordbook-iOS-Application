@@ -235,6 +235,9 @@
 			case 14:
 				bookIcon = @"ico_books_kaoyan.png";
 				break;
+			case 15:
+				bookIcon = @"ico_books_kaoyan.png";
+				break;
 			default:
 				bookIcon = @"ico_books.png";
 				break;
@@ -287,7 +290,7 @@
 		[splitter release];
     cell.selectedBackgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bg_item.png"]];
 	
-    UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ico_book_addnew_n.png"]];
+    UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"step.png"]];
 	[iconImage setFrame: CGRectMake(10, 10, 80, 80)];
 	[cell.contentView addSubview: iconImage];
 	if(iconImage)

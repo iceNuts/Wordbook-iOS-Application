@@ -260,7 +260,9 @@
         case 13:
             return @"四级(2012版)";     
         case 14:
-            return @"考研(2013版)";  
+            return @"考研(2013版)";
+		case 15:
+			return @"考研(2013大纲修订)";
         default:
             return @"(请选择)";
     }
