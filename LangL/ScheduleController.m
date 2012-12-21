@@ -667,6 +667,7 @@
 	}];
 	[request setFailedBlock:^{
 		[mainDelegate showNetworkFailed];
+		[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading:scheduleView];
 	}];
 	[request startAsynchronous];
 	//2 fetch familarity data
@@ -722,6 +723,7 @@
 	}];
 	[request2 setFailedBlock:^{
 		[loadingIcon stopAnimating];
+		[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading: scheduleView];
 	}];
 	[request2 startAsynchronous];
 }
