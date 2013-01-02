@@ -116,6 +116,7 @@
 		
 		mainDelegate.QuizList = [[NSMutableArray alloc] init];
 		
+		
 		for(NSString* wordID in wordIDArr){
 			NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
 			//fetch data in db
@@ -155,10 +156,41 @@
 				[mainDelegate.QuizList addObject:dict];
 			}
 		}
+		
+		if(NO == [[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
+			NSDictionary *reqDict = [NSDictionary dictionaryWithObjectsAndKeys:
+									 wordIDArr, @"wordIDList",
+									 [NSString stringWithFormat:@"%d", mainDelegate.CurrDictType], @"dictType",
+									 nil];
+			
+			//RPC JSON
+			NSString* reqString = [NSString stringWithString:[reqDict JSONRepresentation]];
+			
+			NSURL *url = [NSURL URLWithString:@"http://www.langlib.com/webservices/quiz/ws_WordQuiz.asmx/FetchFixedWordList"];
+			
+			__block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+			[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+			[request addRequestHeader:@"Content-Type" value:@"application/json"];
+			[request appendPostData:[reqString dataUsingEncoding:NSUTF8StringEncoding]];
+			[request setCompletionBlock:^{
+				NSString *responseString = [request responseString];
+				NSDictionary* responseDict = [responseString JSONValue];
+				mainDelegate.QuizList = (NSMutableArray *) [responseDict objectForKey:@"d"];
+				mainDelegate.QuizListID = mainDelegate.CurrListID;
+				[loadingHint stopAnimating];
+				[self DisplayCurrWord];
+			}];
+			[request setFailedBlock:^{
+				LangLAppDelegate *mainDelegate = (LangLAppDelegate *)[[UIApplication sharedApplication]delegate];
+				[mainDelegate showNetworkFailed];
 				
-		mainDelegate.QuizListID = mainDelegate.CurrListID;
-		[loadingHint stopAnimating];
-		[self DisplayCurrWord];
+			}];
+			[request startAsynchronous];
+		}else{
+			mainDelegate.QuizListID = mainDelegate.CurrListID;
+			[loadingHint stopAnimating];
+			[self DisplayCurrWord];
+		}
 	}
     else{
         [loadingHint stopAnimating];

@@ -263,10 +263,17 @@
 			if(isDownloading)
 				hint1.text = @"点击取消下载";
 			else{
-				if([[NSFileManager defaultManager] fileExistsAtPath:dbDir] && mp3done == NO){
+				
+				NSArray *StoreFilePath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+				NSString *DoucumentsDirectiory = [StoreFilePath objectAtIndex:0];
+				NSString *filePath = [DoucumentsDirectiory stringByAppendingPathComponent:@"download_mark.plist"];
+				NSDictionary* dict = [[NSDictionary alloc] initWithContentsOfFile:filePath];
+				NSString* status = [dict objectForKey:[NSString stringWithFormat:@"%d", mainDelegate.CurrDictType]];
+				
+				if(YES == [[NSFileManager defaultManager] fileExistsAtPath:dbDir] && [status isEqualToString:@"0"]){
 					hint1.text = @"下载离线音频";
 					[tmp insertString:@"_voice" atIndex: range.location];
-				}else{
+				}else if(NO == [[NSFileManager defaultManager] fileExistsAtPath:dbDir]){
 					hint1.text = @"下载离线词库和音频";
 					[tmp insertString:@"_all" atIndex: range.location];
 				}
