@@ -1,4 +1,4 @@
-Langlib
+Wordbook
 =======
 
-Langlib iOS client application
+An iOS client application
